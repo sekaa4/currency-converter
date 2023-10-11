@@ -1,0 +1,8 @@
+dist
+node_modules
+doc
+postgres-db
+Dockerfile
+test
+docker-compose.yml
+.dockerignore
