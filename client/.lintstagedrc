@@ -1,6 +1,6 @@
 {
   "*": "prettier --ignore-unknown --write",
-  "*.{js,ts,tsx,jsx}": ["eslint --fix"],
+  "*.{js,ts,tsx,jsx}": ["npm run lint:all", "npm run lint:es:fix"],
   "*.css": "stylelint --fix",
   "*.scss": "stylelint --syntax=scss"
 }

@@ -51,7 +51,7 @@ module.exports = {
     ],
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'max-len': ['error', { code: 120, ignoreUrls: true, ignoreStrings: true }],
+    'max-len': ['error', { code: 100, ignoreUrls: true, ignoreStrings: true }],
     'no-underscore-dangle': [2, { allow: ['_id'] }],
     'no-plusplus': 'off',
     'class-methods-use-this': 'off',
