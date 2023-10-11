@@ -2,12 +2,12 @@ name: Stylelint
 
 on:
   push:
-    branches: ['develop']
+    branches: ["develop"]
   pull_request:
-    branches: ['develop']
+    branches: ["develop"]
 
 jobs:
-  lint:
+  styleLint:
     runs-on: ubuntu-latest
 
     strategy:
@@ -15,10 +15,16 @@ jobs:
         node-version: [18.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
-      - run: npm run lint:css
+
+      - name: Install and styleLint Client
+        working-directory: ./client
+        run: |
+          npm ci
+          npm run lint:css
