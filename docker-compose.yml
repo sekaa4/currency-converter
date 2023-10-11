@@ -1,0 +1,33 @@
+version: "3.8"
+
+networks:
+  default:
+    driver: bridge
+
+services:
+  client:
+    build: ./client
+    container_name: clientapp_c
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./client:/usr/app
+      - /usr/app/node_modules
+    env_file:
+      - ./client/.env
+    networks:
+      - default
+
+  server:
+    build: ./server
+    container_name: serverapp_c
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/usr/app
+      - /usr/app/node_modules
+    networks:
+      - default
+    env_file:
+      - ./server/.env
