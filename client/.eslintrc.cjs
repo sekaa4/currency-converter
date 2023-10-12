@@ -59,5 +59,30 @@ module.exports = {
     'lines-between-class-members': 'off',
     'no-unused-expressions': ['error', { allowShortCircuit: true }],
     'import/prefer-default-export': 'off',
+    'react/jsx-one-expression-per-line': 'off',
+    'react/function-component-definition': [
+      1,
+      {
+        namedComponents: ['function-declaration', 'function-expression', 'arrow-function'],
+        unnamedComponents: ['function-expression', 'arrow-function'],
+      },
+    ],
+    'import/extensions': 0,
+    'jsx-a11y/label-has-associated-control': [
+      'error',
+      {
+        required: {
+          some: ['nesting', 'id'],
+        },
+      },
+    ],
+    'jsx-a11y/label-has-for': [
+      'error',
+      {
+        required: {
+          some: ['nesting', 'id'],
+        },
+      },
+    ],
   },
 };
