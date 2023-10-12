@@ -51,7 +51,7 @@ module.exports = {
     ],
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'max-len': ['error', { code: 100, ignoreUrls: true, ignoreStrings: true }],
+    'max-len': ['error', { code: 120, ignoreUrls: true, ignoreStrings: true }],
     'no-underscore-dangle': [2, { allow: ['_id'] }],
     'no-plusplus': 'off',
     'class-methods-use-this': 'off',
@@ -59,5 +59,30 @@ module.exports = {
     'lines-between-class-members': 'off',
     'no-unused-expressions': ['error', { allowShortCircuit: true }],
     'import/prefer-default-export': 'off',
+    'react/jsx-one-expression-per-line': 'off',
+    'react/function-component-definition': [
+      1,
+      {
+        namedComponents: ['function-declaration', 'function-expression', 'arrow-function'],
+        unnamedComponents: ['function-expression', 'arrow-function'],
+      },
+    ],
+    'import/extensions': 0,
+    'jsx-a11y/label-has-associated-control': [
+      'error',
+      {
+        required: {
+          some: ['nesting', 'id'],
+        },
+      },
+    ],
+    'jsx-a11y/label-has-for': [
+      'error',
+      {
+        required: {
+          some: ['nesting', 'id'],
+        },
+      },
+    ],
   },
 };
