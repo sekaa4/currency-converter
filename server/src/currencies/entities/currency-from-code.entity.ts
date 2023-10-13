@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class Currency {
+export class CurrencyFromCode {
   @ApiProperty({
     type: Number,
     example: 0,
   })
-  rate: number;
+  value: number;
 
   @ApiProperty({
     type: String,
@@ -19,13 +19,6 @@ export class Currency {
     example: 0,
   })
   code: number;
-
-  @ApiProperty({
-    type: 'integer',
-    format: 'integer',
-    example: 0,
-  })
-  quantity: number;
 
   @ApiProperty({
     type: String,
