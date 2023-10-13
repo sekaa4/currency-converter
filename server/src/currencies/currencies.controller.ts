@@ -2,7 +2,7 @@ import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
 import {
   ApiBadRequestResponse,
-  ApiNotFoundResponse,
+  ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -12,7 +12,7 @@ import {
 
 import { CurrenciesService } from './currencies.service';
 import { GetCurrencyQueryDto } from './dto/get-currency-query.dto';
-import { Currency } from './entities/currency.entity';
+import { CurrencyFromCode } from './entities/currency-from-code.entity';
 
 @ApiTags('Currencies')
 @Controller('currencies')
@@ -22,7 +22,13 @@ export class CurrenciesController {
   @ApiOperation({ summary: 'Get all currencies', description: 'Get all currencies' })
   @ApiOkResponse({
     description: 'The resources were returned successfully',
-    type: [Currency],
+    type: [CurrencyFromCode],
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request, currency is invalid',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Something wrong in the server, try again later',
   })
   @Get()
   findAll() {
@@ -38,13 +44,13 @@ export class CurrenciesController {
   @ApiQuery({ name: 'value', type: 'string', allowEmptyValue: true })
   @ApiOkResponse({
     description: 'The resource was returned successfully',
-    type: [Currency],
+    type: [CurrencyFromCode],
   })
   @ApiBadRequestResponse({
     description: 'Bad Request, currency is invalid',
   })
-  @ApiNotFoundResponse({
-    description: 'Currency not found',
+  @ApiInternalServerErrorResponse({
+    description: 'Something wrong in the server, try again later',
   })
   @Get(':code')
   findOne(@Param('code', ParseIntPipe) code: number, @Query() query: GetCurrencyQueryDto) {
