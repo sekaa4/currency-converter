@@ -67,7 +67,12 @@ module.exports = {
         unnamedComponents: ['function-expression', 'arrow-function'],
       },
     ],
-    'import/extensions': 0,
+    'import/extensions': 'off',
+    'object-curly-newline': 'off',
+    'react/jsx-props-no-spreading': 'off',
+    'react/require-default-props': 'off',
+    'implicit-arrow-linebreak': 'off',
+    'no-confusing-arrow': 'off',
     'jsx-a11y/label-has-associated-control': [
       'error',
       {
