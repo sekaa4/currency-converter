@@ -69,8 +69,10 @@ module.exports = {
     ],
     'import/extensions': 'off',
     'object-curly-newline': 'off',
+    'operator-linebreak': 'off',
     'react/jsx-props-no-spreading': 'off',
     'react/require-default-props': 'off',
+    'react/no-unused-prop-types': 'warn',
     'implicit-arrow-linebreak': 'off',
     'no-confusing-arrow': 'off',
     'jsx-a11y/label-has-associated-control': [

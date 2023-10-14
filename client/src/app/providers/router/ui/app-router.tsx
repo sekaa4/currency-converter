@@ -4,7 +4,7 @@ import { routeConfig } from '@/shared/config/route-config/route-config';
 import { routerPath } from '@/shared/lib/constants/app-routes';
 import { Layout } from '@/widgets';
 
-const AppRouter = () => (
+export const AppRouter = () => (
   <Routes>
     <Route path={routerPath.main} element={<Layout />}>
       {Object.values(routeConfig).map(({ element, path }) => (
@@ -13,5 +13,3 @@ const AppRouter = () => (
     </Route>
   </Routes>
 );
-
-export default AppRouter;

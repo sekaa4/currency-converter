@@ -1,11 +1,14 @@
 import { BrowserRouter } from 'react-router-dom';
 
-import { AppRouter } from './providers/router';
+import { AppRouter } from './providers';
 
+import { StoreProvider } from './providers/store-provider';
 import './styles/App.css';
 
 export const App = () => (
   <BrowserRouter>
-    <AppRouter />
+    <StoreProvider>
+      <AppRouter />
+    </StoreProvider>
   </BrowserRouter>
 );
