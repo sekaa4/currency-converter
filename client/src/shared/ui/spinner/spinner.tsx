@@ -1,9 +1,5 @@
 export const Spinner = () => (
-  <div
-    aria-label="Loading..."
-    role="status"
-    className="mx-auto flex-grow justify-center justify-items-center py-12"
-  >
+  <div aria-label="Loading..." role="status" className="mx-auto py-12">
     <svg className="h-10 w-10 animate-spin fill-slate-800" viewBox="3 3 18 18">
       <path
         className="opacity-20"

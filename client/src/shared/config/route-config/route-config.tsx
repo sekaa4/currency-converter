@@ -1,6 +1,7 @@
 import { RouteProps } from 'react-router-dom';
 
 import { CurrenciesListPage, MainPage, NotFoundPage } from '@/pages';
+
 import { AppRoutes, routerPath } from '@/shared/lib/constants/app-routes';
 
 export const routeConfig: Record<AppRoutes, RouteProps> = {

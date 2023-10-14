@@ -1,11 +1,7 @@
-import { InputCurrency } from '@/shared/ui/input-currency/input-currency';
+import { FormCurrencies } from '@/entities/form-currencies/ui/form-currencies';
 
 function MainPage() {
-  return (
-    <div className="mx-auto max-w-7xl">
-      <InputCurrency name="" value="" />
-    </div>
-  );
+  return <FormCurrencies />;
 }
 
 export default MainPage;

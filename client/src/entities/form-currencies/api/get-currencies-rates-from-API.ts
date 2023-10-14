@@ -1,12 +1,21 @@
 import { RequestObj } from '../model/types/request-obj.interface';
 
+import { RatesType } from '../model/types/response-rates.type';
+
 import { rtkAPI } from '@/shared/api/rtk-Api';
+import { RequestObjDefaultParams } from '@/shared/lib/constants/request-obj-default-params';
 
 const getCurrenciesRatesFromAPI = rtkAPI.injectEndpoints({
   endpoints: (build) => ({
-    fetchCurrenciesRatesFromAPI: build.query<Record<string, string>, RequestObj>({
-      query: ({ iso, value, code }) => ({
-        url: code ? `/${code}` : '',
+    fetchCurrenciesRatesFromAPI: build.query<RatesType, RequestObj | void>({
+      query: (
+        {
+          iso = RequestObjDefaultParams.ISO,
+          value = RequestObjDefaultParams.VALUE,
+          code = RequestObjDefaultParams.CODE,
+        } = {} as RequestObj,
+      ) => ({
+        url: `/${code}`,
         params: {
           iso,
           value,
@@ -16,5 +25,5 @@ const getCurrenciesRatesFromAPI = rtkAPI.injectEndpoints({
   }),
 });
 
-export const fetchCurrenciesRatesFromAPI =
-  getCurrenciesRatesFromAPI.useFetchCurrenciesRatesFromAPIQuery;
+export const useLazyFetchCurrenciesRatesFromAPI =
+  getCurrenciesRatesFromAPI.useLazyFetchCurrenciesRatesFromAPIQuery;
