@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { CONSTANTS } from 'src/constants/constants';
 
 import { GetCurrencyQueryDto } from './dto/get-currency-query.dto';
+import { ResponseObjectRates } from './dto/response-object-rates.dto';
 import { CurrencyFromCode } from './entities/currency-from-code.entity';
 import { Currency } from './entities/currency.entity';
 import { ListCurrenciesRates } from './types/list-cyrrency-rates.interface';
@@ -36,7 +37,7 @@ export class CurrenciesService {
 
   async findOne(code: number, query: GetCurrencyQueryDto) {
     const { value } = query;
-    const timestamp = Date.now();
+    let timestamp: number | null = Date.now();
     let resultListCurrencies: Currency[] = [];
     let resultCurrencies: Currency[] | null = code === CONSTANTS.codeBLR ? CONSTANTS.dataBLR : null;
     try {
@@ -54,6 +55,8 @@ export class CurrenciesService {
           resultListCurrencies = (await this.fetchAllCurrenciesData()) as Currency[];
         }
       } else {
+        timestamp = null;
+
         if (!resultCurrencies) {
           [resultCurrencies, resultListCurrencies] = (await this.applyLocalDB(
             code,
@@ -62,8 +65,15 @@ export class CurrenciesService {
         resultListCurrencies = (await this.applyLocalDB()) as Currency[];
       }
       const convertedResult = this.convertCurrencies(resultCurrencies, resultListCurrencies, value);
+      const serializedConvertedResult = JSON.stringify(Array.from(convertedResult));
 
-      return convertedResult;
+      const responseObject: ResponseObjectRates = {
+        rates: serializedConvertedResult,
+        timestamp,
+        sort: null,
+      };
+
+      return responseObject;
     } catch (error) {
       if (error instanceof InternalServerErrorException || error instanceof BadRequestException)
         throw error;
@@ -141,6 +151,7 @@ export class CurrenciesService {
       currencies.length > 0 &&
       currenciesList.length > 0
     ) {
+      const currenciesMap = new Map<string, CurrencyFromCode>();
       const { rate, quantity } = currencies[0];
       const convertToBLR = (rate / quantity) * value;
       const { iso: blrIso, code: blrCode, date: blrDate, name: blrName } = CONSTANTS.dataBLR[0];
@@ -151,9 +162,10 @@ export class CurrenciesService {
         name: blrName,
         value: convertToBLR,
       };
+      currenciesMap.set(blrIso, currencyBLR);
 
       const convertedResult = currenciesList.reduce(
-        (acc: CurrencyFromCode[], cur: Currency) => {
+        (acc: Map<string, CurrencyFromCode>, cur: Currency) => {
           if (cur) {
             const {
               rate: currencyRate,
@@ -172,12 +184,12 @@ export class CurrenciesService {
               name: currencyName,
               value: parsedValueToNumber,
             };
-            acc.push(newCurrency);
+            acc.set(currencyIso, newCurrency);
             return acc;
           }
           return acc;
         },
-        [currencyBLR],
+        currenciesMap,
       );
 
       return convertedResult;
