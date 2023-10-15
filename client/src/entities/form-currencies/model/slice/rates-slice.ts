@@ -1,24 +1,47 @@
 /* eslint-disable no-param-reassign */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { RatesState } from '../types/rates-state.interface';
-import { RatesType } from '../types/response-rates.type';
+import { RatesState, RatesStateFromServer } from '../types/rates-state.interface';
+
+import { BASIC_ISO } from '@/shared/lib/constants/basic-iso';
 
 const initialState: RatesState = {
   rates: [],
+  timestamp: null,
+  basicISO: BASIC_ISO,
+  customISO: [],
+  sort: null,
 };
 
 export const ratesSlice = createSlice({
   name: 'ratesState',
   initialState,
   reducers: {
-    changeRates: (state, action: PayloadAction<RatesType>) => {
+    changeState: (state, action: PayloadAction<RatesStateFromServer>) => {
       if (action.payload) {
-        state.rates = [...action.payload];
+        state = { ...state, ...action.payload };
+      }
+
+      return state;
+    },
+    addCustomISO: (state, action: PayloadAction<string>) => {
+      if (action.payload) {
+        state.customISO = [...state.customISO, action.payload];
+      }
+    },
+    deleteCustomISO: (state, action: PayloadAction<string>) => {
+      if (action.payload) {
+        const curCustomISO = state.customISO;
+        const newCustomISO = curCustomISO.filter((customISO) => customISO !== action.payload);
+        state.customISO = newCustomISO;
       }
     },
     setupInitialState: (state) => {
       state.rates = [];
+      state.timestamp = null;
+      state.basicISO = BASIC_ISO;
+      state.customISO = [];
+      state.sort = null;
     },
   },
 });

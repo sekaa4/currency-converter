@@ -1,13 +1,13 @@
+import { RatesStateFromServer } from '../model/types/rates-state.interface';
 import { RequestObj } from '../model/types/request-obj.interface';
-
-import { RatesType } from '../model/types/response-rates.type';
 
 import { rtkAPI } from '@/shared/api/rtk-Api';
 import { RequestObjDefaultParams } from '@/shared/lib/constants/request-obj-default-params';
+import { isCorrectData } from '@/shared/lib/utils/is-correct-data';
 
 const getCurrenciesRatesFromAPI = rtkAPI.injectEndpoints({
   endpoints: (build) => ({
-    fetchCurrenciesRatesFromAPI: build.query<RatesType, RequestObj | void>({
+    fetchCurrenciesRatesFromAPI: build.query<RatesStateFromServer, RequestObj | void>({
       query: (
         {
           iso = RequestObjDefaultParams.ISO,
@@ -21,6 +21,14 @@ const getCurrenciesRatesFromAPI = rtkAPI.injectEndpoints({
           value,
         },
       }),
+      transformResponse: (response: unknown) => {
+        if (isCorrectData(response)) {
+          return response;
+        }
+        console.log('response', response);
+
+        throw new Error('Recived incorrect data from server, try reload page');
+      },
     }),
   }),
 });

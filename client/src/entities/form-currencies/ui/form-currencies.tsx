@@ -21,7 +21,7 @@ export const FormCurrencies: FC = () => {
 
   useEffect(() => {
     if (data) {
-      dispatch(ratesActions.changeRates(data));
+      dispatch(ratesActions.changeState(data));
     }
   }, [data, dispatch]);
 
@@ -30,22 +30,24 @@ export const FormCurrencies: FC = () => {
   }
 
   return (
-    <>
+    <div className="mx-auto max-w-7xl">
       {isLoading && <Spinner />}
-      {error && <div>{JSON.stringify(error)}</div>}
-      {ratesInState.length !== 0 && (
-        <div className="mx-auto max-w-7xl">
-          <form>
-            <fieldset>
-              <legend>По курсу НБ РБ</legend>
-              {ratesInState.map((currency) => {
-                const { code, iso, name, value } = currency;
-                return <InputCurrency key={code} name={name} value={value} iso={iso} />;
-              })}
-            </fieldset>
-          </form>
+      {error && 'message' in error && (
+        <div className="pointer-events-none cursor-default py-12 text-base font-medium">
+          {error.message}
         </div>
       )}
-    </>
+      {ratesInState.length !== 0 && (
+        <form>
+          <fieldset>
+            <legend>По курсу НБ РБ</legend>
+            {ratesInState.map((currency) => {
+              const { code, iso, name, value } = currency;
+              return <InputCurrency key={code} name={name} value={value} iso={iso} />;
+            })}
+          </fieldset>
+        </form>
+      )}
+    </div>
   );
 };
