@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { CONSTANTS } from 'src/constants/constants';
 
 import { GetCurrencyQueryDto } from './dto/get-currency-query.dto';
+import { ResponseObjectRates } from './dto/response-object-rates.dto';
 import { CurrencyFromCode } from './entities/currency-from-code.entity';
 import { Currency } from './entities/currency.entity';
 import { ListCurrenciesRates } from './types/list-cyrrency-rates.interface';
@@ -36,7 +37,7 @@ export class CurrenciesService {
 
   async findOne(code: number, query: GetCurrencyQueryDto) {
     const { value } = query;
-    const timestamp = Date.now();
+    let timestamp: number | null = Date.now();
     let resultListCurrencies: Currency[] = [];
     let resultCurrencies: Currency[] | null = code === CONSTANTS.codeBLR ? CONSTANTS.dataBLR : null;
     try {
@@ -54,6 +55,7 @@ export class CurrenciesService {
           resultListCurrencies = (await this.fetchAllCurrenciesData()) as Currency[];
         }
       } else {
+        timestamp = null;
         if (!resultCurrencies) {
           [resultCurrencies, resultListCurrencies] = (await this.applyLocalDB(
             code,
@@ -63,7 +65,13 @@ export class CurrenciesService {
       }
       const convertedResult = this.convertCurrencies(resultCurrencies, resultListCurrencies, value);
 
-      return convertedResult;
+      const responseObject: ResponseObjectRates = {
+        rates: convertedResult,
+        timestamp,
+        sort: null,
+      };
+
+      return responseObject;
     } catch (error) {
       if (error instanceof InternalServerErrorException || error instanceof BadRequestException)
         throw error;

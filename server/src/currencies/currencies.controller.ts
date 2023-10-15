@@ -12,7 +12,7 @@ import {
 
 import { CurrenciesService } from './currencies.service';
 import { GetCurrencyQueryDto } from './dto/get-currency-query.dto';
-import { CurrencyFromCode } from './entities/currency-from-code.entity';
+import { ResponseObjectRates } from './dto/response-object-rates.dto';
 
 @ApiTags('Currencies')
 @Controller('currencies')
@@ -22,7 +22,7 @@ export class CurrenciesController {
   @ApiOperation({ summary: 'Get all currencies', description: 'Get all currencies' })
   @ApiOkResponse({
     description: 'The resources were returned successfully',
-    type: [CurrencyFromCode],
+    type: ResponseObjectRates,
   })
   @ApiBadRequestResponse({
     description: 'Bad Request, currency is invalid',
@@ -31,7 +31,7 @@ export class CurrenciesController {
     description: 'Something wrong in the server, try again later',
   })
   @Get()
-  findAll() {
+  findAll(): Promise<ResponseObjectRates> {
     return this.currenciesService.findAll();
   }
 
@@ -44,7 +44,7 @@ export class CurrenciesController {
   @ApiQuery({ name: 'value', type: 'string', allowEmptyValue: true })
   @ApiOkResponse({
     description: 'The resource was returned successfully',
-    type: [CurrencyFromCode],
+    type: ResponseObjectRates,
   })
   @ApiBadRequestResponse({
     description: 'Bad Request, currency is invalid',
@@ -53,7 +53,10 @@ export class CurrenciesController {
     description: 'Something wrong in the server, try again later',
   })
   @Get(':code')
-  findOne(@Param('code', ParseIntPipe) code: number, @Query() query: GetCurrencyQueryDto) {
+  findOne(
+    @Param('code', ParseIntPipe) code: number,
+    @Query() query: GetCurrencyQueryDto,
+  ): Promise<ResponseObjectRates> {
     console.log('query', query);
     return this.currenciesService.findOne(code, query);
   }
