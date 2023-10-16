@@ -1,4 +1,4 @@
-type ResponseCurrency = {
+export type ResponseCurrency = {
   value: number;
   iso: string;
   code: number;
@@ -6,4 +6,4 @@ type ResponseCurrency = {
   name: string;
 };
 
-export type RatesType = ResponseCurrency[];
+export type RatesType = Map<string, ResponseCurrency>;

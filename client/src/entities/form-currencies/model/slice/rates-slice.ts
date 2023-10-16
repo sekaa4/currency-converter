@@ -6,7 +6,7 @@ import { RatesState, RatesStateFromServer } from '../types/rates-state.interface
 import { BASIC_ISO } from '@/shared/lib/constants/basic-iso';
 
 const initialState: RatesState = {
-  rates: [],
+  rates: '',
   timestamp: null,
   basicISO: BASIC_ISO,
   customISO: [],
@@ -37,7 +37,7 @@ export const ratesSlice = createSlice({
       }
     },
     setupInitialState: (state) => {
-      state.rates = [];
+      state.rates = '';
       state.timestamp = null;
       state.basicISO = BASIC_ISO;
       state.customISO = [];

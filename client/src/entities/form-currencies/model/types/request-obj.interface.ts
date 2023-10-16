@@ -1,5 +1,5 @@
 export interface RequestObj {
   iso: string;
-  value: number;
-  code?: number;
+  value: number | string;
+  code?: number | string;
 }
