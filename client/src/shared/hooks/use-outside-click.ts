@@ -7,15 +7,15 @@ export const useOutsideClick = (
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (elementRef.current && !elementRef.current.contains(event.target as Node)) {
-        event.stopPropagation();
         callback();
       }
     };
-
-    document.addEventListener('click', handleClickOutside, true);
-
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside);
+    }, 0);
     return () => {
-      document.removeEventListener('click', handleClickOutside, true);
+      clearTimeout(timeoutId);
+      document.removeEventListener('click', handleClickOutside);
     };
   }, [callback, elementRef]);
 };

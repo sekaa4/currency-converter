@@ -35,7 +35,7 @@ export const Header: FC<NavbarProps> = () => {
   }
 
   return (
-    <header>
+    <header className="fixed z-10 w-full">
       <div className="bg-gray-800">
         <div className="relative mx-auto flex max-w-7xl flex-row-reverse items-center justify-between">
           <h1 className="cursor-default rounded-md px-3 py-2 text-xl font-medium text-white">

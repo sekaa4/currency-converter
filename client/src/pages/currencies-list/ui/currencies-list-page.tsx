@@ -18,10 +18,6 @@ const CurrenciesListPage: FC = () => {
   const deSerializeRates = ratesInState && (new Map(JSON.parse(ratesInState)) as RatesType);
   const dispatch = useAppDispatch();
 
-  // console.log('isLoading', isLoading, isUninitialized, isFetching);
-  // console.log('first', data);
-  // console.log('ratesInState', ratesInState);
-
   useEffect(() => {
     if (data) {
       dispatch(ratesActions.changeState(data));
@@ -52,7 +48,9 @@ const CurrenciesListPage: FC = () => {
             </legend>
             {(Array.from(deSerializeRates.values()) as ResponseCurrency[]).map((currency) => {
               const { code, iso, name, value } = currency;
-              return <InputCurrency key={code} name={name} value={value} iso={iso} code={code} />;
+              return (
+                <InputCurrency key={code} name={name} value={value} iso={iso} code={code} isValid />
+              );
             })}
           </fieldset>
         </form>

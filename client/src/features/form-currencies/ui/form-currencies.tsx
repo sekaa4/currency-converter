@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { ChangeEvent, FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useLazyFetchCurrenciesRatesFromAPI } from '../api/get-currencies-rates-from-API';
 import { getBasicIsoFromState } from '../model/selectors/get-basic-iso-from-state/get-basic-iso-from-state';
@@ -15,16 +15,13 @@ import { RequestObjDefaultParams } from '@/shared/lib/constants/request-obj-defa
 
 import { RequestObj } from '@/shared/lib/types/request-obj.interface';
 import { RatesType } from '@/shared/lib/types/response-rates.type';
+import { isNumber } from '@/shared/lib/utils/is-number';
 import { Spinner } from '@/shared/ui/spinner/spinner';
-
-// interface FormCurrenciesProps {
-//   deSerializeRates: "" | RatesType;
-// }
 
 export const FormCurrencies: FC = () => {
   const [getCurrenciesRates, { data, error, isLoading, isUninitialized }] =
     useLazyFetchCurrenciesRatesFromAPI();
-
+  const dispatch = useAppDispatch();
   const ratesInState = useAppSelector(getRatesFromState);
   const basicIsoInState = useAppSelector(getBasicIsoFromState);
   const customIsoInState = useAppSelector(getCustomIsoFromState);
@@ -33,10 +30,15 @@ export const FormCurrencies: FC = () => {
     iso: RequestObjDefaultParams.ISO,
     value: RequestObjDefaultParams.VALUE,
     code: RequestObjDefaultParams.CODE,
+    isValid: true,
   });
 
   const deSerializeRates = ratesInState && (new Map(JSON.parse(ratesInState)) as RatesType);
-  const dispatch = useAppDispatch();
+
+  const isoOutOfDropMenu = useMemo(
+    () => [...basicIsoInState, ...customIsoInState],
+    [basicIsoInState, customIsoInState],
+  );
 
   useEffect(() => {
     if (data) {
@@ -44,31 +46,46 @@ export const FormCurrencies: FC = () => {
     }
   }, [data, dispatch]);
 
-  useLayoutEffect(() => {
-    const { abort, unsubscribe } = getCurrenciesRates(inputValue);
-    return () => {
-      if (!isUninitialized) {
-        abort();
-        unsubscribe();
-      }
-    };
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    if (inputValue.isValid) {
+      const { abort, unsubscribe } = getCurrenciesRates(inputValue);
+      return () => {
+        if (!isUninitialized) {
+          abort();
+          unsubscribe();
+        }
+      };
+    }
   }, [inputValue, dispatch, getCurrenciesRates, isUninitialized]);
 
-  const onChangeInput = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
+  const onChangeInput = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const { value, id, dataset } = event.target;
     const { code } = dataset;
-    console.log('event', dataset);
 
+    const requestObj: RequestObj = {
+      iso: id,
+      value,
+      code: code ?? Number(code),
+      isValid: value === '' ? true : isNumber(value),
+    };
+    console.log('requestObj', requestObj);
     if (value === '' || value.match(/^([0-9]{1,})?(.)?([0-9]{1,})?$/)) {
-      const requestObj = {
-        iso: id,
-        value: parseFloat(value) || '',
-        code: code ?? Number(code),
-      };
-
+      requestObj.value = parseFloat(value) || '';
       setInputValue(requestObj);
     }
+
+    console.log('requestObj', requestObj);
   }, []);
+
+  const handleClickDeleteCurrency = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      const curIso = event.currentTarget.dataset.iso;
+      console.log('curIso', curIso);
+      if (curIso) dispatch(ratesActions.deleteCustomISO(curIso));
+    },
+    [dispatch],
+  );
 
   console.log('error', error);
 
@@ -81,7 +98,7 @@ export const FormCurrencies: FC = () => {
         </div>
       )} */}
       {deSerializeRates && (
-        <>
+        <div className="relative h-full">
           <FormOfInputs
             deSerializeRates={deSerializeRates}
             timestampInState={timestampInState}
@@ -89,10 +106,14 @@ export const FormCurrencies: FC = () => {
             customIsoInState={customIsoInState}
             inputValue={inputValue}
             onChangeInput={onChangeInput}
+            handleClickDeleteCurrency={handleClickDeleteCurrency}
           />
 
-          <DropMenuOfCurrencies />
-        </>
+          <DropMenuOfCurrencies
+            deSerializeRates={deSerializeRates}
+            isoOutOfDropMenu={isoOutOfDropMenu}
+          />
+        </div>
       )}
     </>
   );
