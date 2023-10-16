@@ -1,7 +1,11 @@
-import { FormCurrencies } from '@/entities/form-currencies/ui/form-currencies';
+import { FormCurrencies } from '@/features/form-currencies/ui/form-currencies';
 
 function MainPage() {
-  return <FormCurrencies />;
+  return (
+    <div className="mt-10 py-8 font-medium">
+      <FormCurrencies />
+    </div>
+  );
 }
 
 export default MainPage;
