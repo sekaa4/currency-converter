@@ -5,5 +5,5 @@ import { getRatesState } from '../get-rates-state/get-rates-state';
 
 export const getBasicIsoFromState = createSelector(
   getRatesState,
-  (ratesState: RatesState) => ratesState.timestamp,
+  (ratesState: RatesState) => ratesState.basicISO,
 );
