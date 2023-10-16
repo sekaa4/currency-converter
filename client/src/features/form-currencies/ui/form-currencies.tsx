@@ -8,14 +8,18 @@ import { getRatesFromState } from '../model/selectors/get-rates-from-state/get-r
 import { getTimestampFromState } from '../model/selectors/get-timestamp-from-state/get-timestamp-from-state';
 import { ratesActions } from '../model/slice/rates-slice';
 
-import { RequestObj } from '../model/types/request-obj.interface';
-import { RatesType, ResponseCurrency } from '../model/types/response-rates.type';
-
-import { ListOfCurrencies } from '@/entities/list-of-currencies/ui/list-of-currencies';
+import { DropMenuOfCurrencies } from '@/entities/drop-menu-of-currencies';
+import { FormOfInputs } from '@/entities/form-of-inputs/ui/form-of-inputs';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks';
 import { RequestObjDefaultParams } from '@/shared/lib/constants/request-obj-default-params';
-import { InputCurrency } from '@/shared/ui/input-currency/input-currency';
+
+import { RequestObj } from '@/shared/lib/types/request-obj.interface';
+import { RatesType } from '@/shared/lib/types/response-rates.type';
 import { Spinner } from '@/shared/ui/spinner/spinner';
+
+// interface FormCurrenciesProps {
+//   deSerializeRates: "" | RatesType;
+// }
 
 export const FormCurrencies: FC = () => {
   const [getCurrenciesRates, { data, error, isLoading, isUninitialized }] =
@@ -69,7 +73,7 @@ export const FormCurrencies: FC = () => {
   console.log('error', error);
 
   return (
-    <div className="mx-auto max-w-7xl py-12 font-medium">
+    <>
       {isLoading && <Spinner />}
       {/* {error && 'message' in error && (
         <div className="pointer-events-none cursor-default py-12 text-base font-medium">
@@ -77,58 +81,19 @@ export const FormCurrencies: FC = () => {
         </div>
       )} */}
       {deSerializeRates && (
-        <div>
-          <form>
-            <fieldset>
-              <legend>
-                По курсу НБ РБ,{' '}
-                {timestampInState
-                  ? `данные из базы на ${new Date(timestampInState)}`
-                  : 'данные из локальной базы'}
-              </legend>
-              {basicIsoInState.map((basicIso) => {
-                if (deSerializeRates.has(basicIso)) {
-                  const { code, iso, name, value } = deSerializeRates.get(
-                    basicIso,
-                  ) as ResponseCurrency;
-                  return (
-                    <InputCurrency
-                      key={code}
-                      name={name}
-                      value={inputValue.iso !== basicIso ? value : inputValue.value}
-                      iso={iso}
-                      code={code}
-                      // inputObj={inputValue}
-                      onChange={onChangeInput}
-                    />
-                  );
-                }
-                return '';
-              })}
-              {customIsoInState.map((customIso) => {
-                if (deSerializeRates.has(customIso)) {
-                  const { code, iso, name, value } = deSerializeRates.get(
-                    customIso,
-                  ) as ResponseCurrency;
-                  return (
-                    <InputCurrency
-                      key={code}
-                      name={name}
-                      value={value}
-                      iso={iso}
-                      code={code}
-                      onChange={onChangeInput}
-                    />
-                  );
-                }
-                return '';
-              })}
-            </fieldset>
-          </form>
+        <>
+          <FormOfInputs
+            deSerializeRates={deSerializeRates}
+            timestampInState={timestampInState}
+            basicIsoInState={basicIsoInState}
+            customIsoInState={customIsoInState}
+            inputValue={inputValue}
+            onChangeInput={onChangeInput}
+          />
 
-          <ListOfCurrencies />
-        </div>
+          <DropMenuOfCurrencies />
+        </>
       )}
-    </div>
+    </>
   );
 };

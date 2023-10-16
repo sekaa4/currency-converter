@@ -1,14 +1,11 @@
 import { FC, useEffect } from 'react';
 
-import { ratesActions } from '@/entities/form-currencies';
-import { useLazyFetchCurrenciesRatesFromAPI } from '@/entities/form-currencies/api/get-currencies-rates-from-API';
-import { getRatesFromState } from '@/entities/form-currencies/model/selectors/get-rates-from-state/get-rates-from-state';
-import { getTimestampFromState } from '@/entities/form-currencies/model/selectors/get-timestamp-from-state/get-timestamp-from-state';
-import {
-  RatesType,
-  ResponseCurrency,
-} from '@/entities/form-currencies/model/types/response-rates.type';
+import { ratesActions } from '@/features/form-currencies';
+import { useLazyFetchCurrenciesRatesFromAPI } from '@/features/form-currencies/api/get-currencies-rates-from-API';
+import { getRatesFromState } from '@/features/form-currencies/model/selectors/get-rates-from-state/get-rates-from-state';
+import { getTimestampFromState } from '@/features/form-currencies/model/selectors/get-timestamp-from-state/get-timestamp-from-state';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks';
+import { RatesType, ResponseCurrency } from '@/shared/lib/types/response-rates.type';
 import { InputCurrency } from '@/shared/ui/input-currency/input-currency';
 import { Spinner } from '@/shared/ui/spinner/spinner';
 

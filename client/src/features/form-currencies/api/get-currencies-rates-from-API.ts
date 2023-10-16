@@ -1,8 +1,8 @@
 import { RatesStateFromServer } from '../model/types/rates-state.interface';
-import { RequestObj } from '../model/types/request-obj.interface';
 
 import { rtkAPI } from '@/shared/api/rtk-Api';
 import { RequestObjDefaultParams } from '@/shared/lib/constants/request-obj-default-params';
+import { RequestObj } from '@/shared/lib/types/request-obj.interface';
 import { isCorrectData } from '@/shared/lib/utils/is-correct-data';
 
 const getCurrenciesRatesFromAPI = rtkAPI.injectEndpoints({

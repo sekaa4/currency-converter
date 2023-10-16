@@ -1,4 +1,4 @@
-import { RatesStateFromServer } from '@/entities/form-currencies/model/types/rates-state.interface';
+import { RatesStateFromServer } from '@/features/form-currencies/model/types/rates-state.interface';
 
 export const isCorrectData = (
   data: unknown | RatesStateFromServer,

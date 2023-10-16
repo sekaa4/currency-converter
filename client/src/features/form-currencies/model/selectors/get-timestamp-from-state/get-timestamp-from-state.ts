@@ -1,7 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
 
-import { RatesState } from '../../types/rates-state.interface';
 import { getRatesState } from '../get-rates-state/get-rates-state';
+
+import { RatesState } from '@/shared/lib/types/rates-state.interface';
 
 export const getTimestampFromState = createSelector(
   getRatesState,

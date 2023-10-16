@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { combineReducers, AnyAction, configureStore, Reducer } from '@reduxjs/toolkit';
 
-import { ratesReducer } from '@/entities/form-currencies';
+import { ratesReducer } from '@/features/form-currencies';
 import { rtkAPI } from '@/shared/api/rtk-Api';
 
 const combinedReducer = combineReducers({
