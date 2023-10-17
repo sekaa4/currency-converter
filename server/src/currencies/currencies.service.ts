@@ -71,6 +71,7 @@ export class CurrenciesService {
         rates: serializedConvertedResult,
         timestamp,
         sort: null,
+        order: null,
       };
 
       return responseObject;
@@ -160,7 +161,7 @@ export class CurrenciesService {
         code: blrCode,
         date: blrDate.toString(),
         name: blrName,
-        value: convertToBLR,
+        value: Number(convertToBLR.toFixed(4)),
       };
       currenciesMap.set(blrIso, currencyBLR);
 
