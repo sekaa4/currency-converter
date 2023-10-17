@@ -2,11 +2,13 @@
 import { combineReducers, AnyAction, configureStore, Reducer } from '@reduxjs/toolkit';
 
 import { ratesReducer } from '@/features/form-currencies';
+import { sortRatesReducer } from '@/features/sort-list-of-currencies';
 import { rtkAPI } from '@/shared/api/rtk-Api';
 
 const combinedReducer = combineReducers({
   [rtkAPI.reducerPath]: rtkAPI.reducer,
   ratesState: ratesReducer,
+  sortRatesState: sortRatesReducer,
 });
 
 const rootReducer: Reducer = (state: RootState, action: AnyAction) => {

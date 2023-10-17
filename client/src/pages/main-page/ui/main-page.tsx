@@ -2,7 +2,7 @@ import { FormCurrencies } from '@/features/form-currencies/ui/form-currencies';
 
 function MainPage() {
   return (
-    <div className="mt-10 py-8 font-medium">
+    <div className="mt-10 pb-14 pt-7 font-medium">
       <FormCurrencies />
     </div>
   );

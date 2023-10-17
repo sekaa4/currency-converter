@@ -1,0 +1,19 @@
+.asc {
+  background-image: url('../../../shared/assets/icons/up_arrow.png');
+}
+
+.desc {
+  background-image: url('../../../shared/assets/icons/down_arrow.png');
+}
+
+.default {
+  background-image: url('../../../shared/assets/icons/default.png');
+}
+
+.asc,
+.desc,
+.default {
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-position: center right;
+}
