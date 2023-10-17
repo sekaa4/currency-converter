@@ -48,7 +48,7 @@ export const FormCurrencies: FC = () => {
 
   // eslint-disable-next-line consistent-return
   useEffect(() => {
-    if (inputValue.isValid) {
+    if (inputValue.isValid && !ratesInState) {
       const { abort, unsubscribe } = getCurrenciesRates(inputValue);
       return () => {
         if (!isUninitialized) {
@@ -57,7 +57,7 @@ export const FormCurrencies: FC = () => {
         }
       };
     }
-  }, [inputValue, dispatch, getCurrenciesRates, isUninitialized]);
+  }, [inputValue, dispatch, getCurrenciesRates, isUninitialized, ratesInState]);
 
   const onChangeInput = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const { value, id, dataset } = event.target;

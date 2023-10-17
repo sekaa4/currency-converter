@@ -1,3 +1,5 @@
+import { OrderType, SortByType } from './sort.type';
+
 import { BASIC_ISO } from '@/shared/lib/constants/basic-iso';
 
 export interface RatesState {
@@ -5,5 +7,6 @@ export interface RatesState {
   timestamp: number | null;
   basicISO: typeof BASIC_ISO;
   customISO: string[];
-  sort: 'asc' | 'desc' | null;
+  order: OrderType;
+  sort: SortByType;
 }
