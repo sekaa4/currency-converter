@@ -2,7 +2,7 @@ import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 
 import { CurrencyFromCode } from '../entities/currency-from-code.entity';
 
-import { OrderType, SortType } from '../types/sort-type.type';
+import { Order, ResponseOrderType, ResponseSortType, Sort } from '../types/sort-type.type';
 
 @ApiExtraModels(CurrencyFromCode)
 export class ResponseObjectRates {
@@ -24,14 +24,14 @@ export class ResponseObjectRates {
   @ApiProperty({
     type: String,
     nullable: true,
-    example: SortType[0],
+    example: Sort[0],
   })
-  sort: (typeof SortType)[number];
+  sort: ResponseSortType;
 
   @ApiProperty({
     type: String,
     nullable: true,
-    example: OrderType[0],
+    example: Order[0],
   })
-  order: (typeof OrderType)[number];
+  order: ResponseOrderType;
 }
