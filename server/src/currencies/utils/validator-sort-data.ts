@@ -8,8 +8,6 @@ import {
 @ValidatorConstraint({ name: 'validator-sort-data', async: false })
 export class ValidatorSortData implements ValidatorConstraintInterface {
   validate(text: any, args: ValidationArguments) {
-    console.log('text', text);
-    console.log('args', args);
     return text === 'value' || text === 'name' || text === 'null';
   }
 

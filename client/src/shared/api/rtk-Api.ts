@@ -2,8 +2,6 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/dist/query/react';
 
 import { URLConstants } from '../lib/constants/server-url';
 
-console.log('process', import.meta.env);
-
 export const rtkAPI = createApi({
   reducerPath: 'API',
   baseQuery: fetchBaseQuery({

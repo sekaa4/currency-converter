@@ -22,7 +22,6 @@ export const SortListCurrencies: FC = () => {
   // const timestampInState = useAppSelector(getTimestampFromSortRatesState);
 
   useEffect(() => {
-    console.log('1');
     if (data) {
       dispatch(sortRatesActions.changeSortState(data));
     }
@@ -30,7 +29,6 @@ export const SortListCurrencies: FC = () => {
 
   // eslint-disable-next-line consistent-return
   useEffect(() => {
-    console.log('2');
     if (!sortRatesInState) {
       const { abort, unsubscribe } = getListCurrenciesRates();
       return () => {
@@ -50,7 +48,6 @@ export const SortListCurrencies: FC = () => {
 
   // eslint-disable-next-line consistent-return
   useEffect(() => {
-    console.log('3');
     const { order, sortBy } = sortByFromSortRatesState;
 
     if (sortBy && (order || order === null)) {
@@ -64,9 +61,6 @@ export const SortListCurrencies: FC = () => {
 
   const deSerializeSortRates =
     sortRatesInState && (new Map(JSON.parse(sortRatesInState)) as RatesType);
-
-  console.log('handle', sortRatesInState);
-  console.log('NOhandle', sortByFromSortRatesState);
 
   return (
     <>

@@ -8,8 +8,6 @@ import {
 @ValidatorConstraint({ name: 'validator-order-data', async: false })
 export class ValidatorOrderData implements ValidatorConstraintInterface {
   validate(text: any, args: ValidationArguments) {
-    console.log('text', text);
-    console.log('args', args);
     return text === 'asc' || text === 'desc' || text === 'null';
   }
 

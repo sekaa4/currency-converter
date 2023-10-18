@@ -29,17 +29,10 @@ export class CurrenciesService {
 
   async findAll(queryParams?: GetCurrencySortQueryDto) {
     try {
-      // const { codeUSD, dataUSD } = CONSTANTS;
-
-      // if (order && sort) {
-      //   const listOfCurrenciesWithoutSort = await this.findOne(codeUSD, dataUSD);
-      // }
-
       const resultObject = await this.findOne(undefined, queryParams);
 
       return resultObject;
     } catch (error) {
-      console.log('error', error);
       if (error instanceof InternalServerErrorException || error instanceof BadRequestException)
         throw error;
       throw new InternalServerErrorException('Something wrong in the server, try again later');
@@ -152,9 +145,7 @@ export class CurrenciesService {
   async applyLocalDB(code?: number) {
     if (code) {
       const resultListCurrencies = [...localDB.rates] as unknown as Currency[];
-      console.log('code', resultListCurrencies);
       const resultSearchCurrency = resultListCurrencies.find((currency) => currency.code === code);
-      console.log('resultSearchCurrency', resultSearchCurrency);
 
       if (resultSearchCurrency) {
         const resultCurrencies = [resultSearchCurrency];
@@ -237,7 +228,6 @@ export class CurrenciesService {
 
       if (querySortParams) {
         const { order, sort } = querySortParams;
-        console.log(order, sort);
         convertedResult =
           sort && order && order !== 'null'
             ? this.sortCurrenciesByOrder(convertedResult, sort as Exclude<SortType, 'null'>, order)

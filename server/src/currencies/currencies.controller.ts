@@ -36,7 +36,6 @@ export class CurrenciesController {
   })
   @Get()
   findAll(@Query() query: GetCurrencySortQueryDto) {
-    // console.log('query', query);
     return this.currenciesService.findAll(query);
   }
 

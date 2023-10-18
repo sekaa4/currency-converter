@@ -79,13 +79,11 @@ export const FormCurrencies: FC = () => {
   const handleClickDeleteCurrency = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       const curIso = event.currentTarget.dataset.iso;
-      console.log('curIso', curIso);
+
       if (curIso) dispatch(ratesActions.deleteCustomISO(curIso));
     },
     [dispatch],
   );
-
-  console.log('error', error);
 
   return (
     <>

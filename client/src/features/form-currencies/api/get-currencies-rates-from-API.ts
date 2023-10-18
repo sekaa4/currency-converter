@@ -27,7 +27,6 @@ const getCurrenciesRatesFromAPI = rtkAPI.injectEndpoints({
         if (isCorrectData(response)) {
           return response;
         }
-        console.log('response', response);
 
         throw new Error('Recived incorrect data from server, try reload page');
       },
