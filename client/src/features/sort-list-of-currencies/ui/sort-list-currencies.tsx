@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useRef } from 'react';
 
 import { sortRatesActions } from '..';
 import { useLazyFetchSortCurrenciesRatesFromAPI } from '../api/get-sort-currencies-from-API';
@@ -19,6 +19,7 @@ export const SortListCurrencies: FC = () => {
   const dispatch = useAppDispatch();
   const sortRatesInState = useAppSelector(getRatesFromSortRatesState);
   const sortByFromSortRatesState = useAppSelector(getSortByFromSortRatesState);
+  const isMounted = useRef(false);
   // const timestampInState = useAppSelector(getTimestampFromSortRatesState);
 
   useEffect(() => {
@@ -38,26 +39,25 @@ export const SortListCurrencies: FC = () => {
         }
       };
     }
-  }, [
-    dispatch,
-    isUninitialized,
-    getListCurrenciesRates,
-    sortRatesInState,
-    sortByFromSortRatesState,
-  ]);
+  }, [getListCurrenciesRates, isUninitialized, sortRatesInState]);
 
   // eslint-disable-next-line consistent-return
   useEffect(() => {
-    const { order, sortBy } = sortByFromSortRatesState;
-
-    if (sortBy && (order || order === null)) {
-      const { abort, unsubscribe } = getListCurrenciesRates({ order, sort: sortBy });
-      return () => {
-        abort();
-        unsubscribe();
-      };
+    if (isMounted.current) {
+      const { order, sortBy } = sortByFromSortRatesState;
+      if (sortBy && (order || order === null)) {
+        const { abort, unsubscribe } = getListCurrenciesRates({ order, sort: sortBy });
+        return () => {
+          if (!isUninitialized) {
+            abort();
+            unsubscribe();
+          }
+        };
+      }
+    } else {
+      isMounted.current = true;
     }
-  }, [getListCurrenciesRates, sortByFromSortRatesState]);
+  }, [getListCurrenciesRates, isUninitialized, sortByFromSortRatesState]);
 
   const deSerializeSortRates =
     sortRatesInState && (new Map(JSON.parse(sortRatesInState)) as RatesType);
@@ -65,7 +65,7 @@ export const SortListCurrencies: FC = () => {
   return (
     <>
       {isLoading && <Spinner />}
-      {!isLoading && error && 'message' in error && (
+      {!isLoading && error && 'message' in error && error.message !== 'Aborted' && (
         <div className="pointer-events-none cursor-default py-12 text-base font-medium">
           {error.message}
         </div>

@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useLazyFetchCurrenciesRatesFromAPI } from '../api/get-currencies-rates-from-API';
 import { getBasicIsoFromState } from '../model/selectors/get-basic-iso-from-state/get-basic-iso-from-state';
@@ -28,6 +28,7 @@ export const FormCurrencies: FC = () => {
   const [inputValue, setInputValue] = useState<RequestObj | undefined>();
 
   const deSerializeRates = ratesInState && (new Map(JSON.parse(ratesInState)) as RatesType);
+  const isMounted = useRef(false);
 
   const isoOutOfDropMenu = useMemo(
     () => [...basicIsoInState, ...customIsoInState],
@@ -53,28 +54,39 @@ export const FormCurrencies: FC = () => {
     }
   }, [dispatch, getCurrenciesRates, isUninitialized, ratesInState]);
 
-  const onChangeInput = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const { value, id, dataset } = event.target;
-      const { code } = dataset;
-
-      const requestObj: RequestObj = {
-        iso: id,
-        value,
-        code: code ?? Number(code),
-        isValid: value === '' ? true : isNumber(value),
-      };
-
-      if (value === '' || value.match(/^([0-9]{1,})?(.)?([0-9]{1,})?$/)) {
-        requestObj.value = parseFloat(value) || '';
-        setInputValue(requestObj);
-        if (requestObj.isValid) {
-          getCurrenciesRates(requestObj);
-        }
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    if (isMounted.current) {
+      if (inputValue) {
+        const { abort, unsubscribe } = getCurrenciesRates(inputValue);
+        return () => {
+          if (!isUninitialized) {
+            abort();
+            unsubscribe();
+          }
+        };
       }
-    },
-    [getCurrenciesRates],
-  );
+    } else {
+      isMounted.current = true;
+    }
+  }, [getCurrenciesRates, inputValue, isUninitialized]);
+
+  const onChangeInput = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const { value, id, dataset } = event.target;
+    const { code } = dataset;
+
+    const requestObj: RequestObj = {
+      iso: id,
+      value,
+      code: code ?? Number(code),
+      isValid: value === '' ? true : isNumber(value),
+    };
+
+    if (value === '' || value.match(/^([0-9]{1,})?(.)?([0-9]{1,})?$/)) {
+      requestObj.value = parseFloat(value) || '';
+      setInputValue(requestObj);
+    }
+  }, []);
 
   const handleClickDeleteCurrency = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -88,12 +100,12 @@ export const FormCurrencies: FC = () => {
   return (
     <>
       {isLoading && <Spinner />}
-      {error && 'message' in error && (
+      {!isLoading && error && 'message' in error && error.message !== 'Aborted' && (
         <div className="pointer-events-none cursor-default py-12 text-base font-medium">
           {error.message}
         </div>
       )}
-      {deSerializeRates && !isLoading && (
+      {!isLoading && deSerializeRates && (
         <div className="relative h-full">
           <FormOfInputs
             deSerializeRates={deSerializeRates}
