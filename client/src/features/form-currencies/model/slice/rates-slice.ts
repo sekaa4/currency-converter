@@ -11,8 +11,8 @@ const initialState: RatesState = {
   timestamp: null,
   basicISO: BASIC_ISO,
   customISO: [],
-  sort: null,
   order: null,
+  sort: null,
 };
 
 export const ratesSlice = createSlice({

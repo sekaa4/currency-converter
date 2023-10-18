@@ -10,7 +10,7 @@ interface FormOfInputsProps {
   timestampInState: number | null;
   basicIsoInState: typeof BASIC_ISO;
   customIsoInState: string[];
-  inputValue: RequestObj;
+  inputValue?: RequestObj;
   onChangeInput: (event: ChangeEvent<HTMLInputElement>) => void;
   handleClickDeleteCurrency: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
@@ -42,12 +42,12 @@ export const FormOfInputs: FC<FormOfInputsProps> = (props) => {
               <InputCurrency
                 key={code}
                 name={name}
-                value={inputValue.iso !== basicIso ? value : inputValue.value}
+                value={inputValue && inputValue.iso === iso ? inputValue.value : value}
                 iso={iso}
                 code={code}
                 onChange={onChangeInput}
                 handleClickDeleteCurrency={handleClickDeleteCurrency}
-                isValid={inputValue.iso !== basicIso ? true : inputValue.isValid}
+                isValid={!!(inputValue && inputValue.iso !== basicIso)}
               />
             );
           }
@@ -63,13 +63,13 @@ export const FormOfInputs: FC<FormOfInputsProps> = (props) => {
                 <InputCurrency
                   key={code}
                   name={name}
-                  value={inputValue.iso !== customIso ? value : inputValue.value}
+                  value={!inputValue ? value : inputValue.value}
                   iso={iso}
                   code={code}
                   onChange={onChangeInput}
                   handleClickDeleteCurrency={handleClickDeleteCurrency}
                   custom
-                  isValid={inputValue.iso !== customIso ? true : inputValue.isValid}
+                  isValid={!!(inputValue && inputValue.iso !== customIso)}
                 />
               );
             }
