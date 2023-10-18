@@ -11,7 +11,6 @@ import { ratesActions } from '../model/slice/rates-slice';
 import { DropMenuOfCurrencies } from '@/entities/drop-menu-of-currencies';
 import { FormOfInputs } from '@/entities/form-of-inputs/ui/form-of-inputs';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks';
-import { RequestObjDefaultParams } from '@/shared/lib/constants/request-obj-default-params';
 
 import { RequestObj } from '@/shared/lib/types/request-obj.interface';
 import { RatesType } from '@/shared/lib/types/response-rates.type';
@@ -26,12 +25,7 @@ export const FormCurrencies: FC = () => {
   const basicIsoInState = useAppSelector(getBasicIsoFromState);
   const customIsoInState = useAppSelector(getCustomIsoFromState);
   const timestampInState = useAppSelector(getTimestampFromState);
-  const [inputValue, setInputValue] = useState<RequestObj>({
-    iso: RequestObjDefaultParams.ISO,
-    value: RequestObjDefaultParams.VALUE,
-    code: RequestObjDefaultParams.CODE,
-    isValid: true,
-  });
+  const [inputValue, setInputValue] = useState<RequestObj | undefined>();
 
   const deSerializeRates = ratesInState && (new Map(JSON.parse(ratesInState)) as RatesType);
 
@@ -48,8 +42,8 @@ export const FormCurrencies: FC = () => {
 
   // eslint-disable-next-line consistent-return
   useEffect(() => {
-    if (inputValue.isValid && !ratesInState) {
-      const { abort, unsubscribe } = getCurrenciesRates(inputValue);
+    if (!ratesInState) {
+      const { abort, unsubscribe } = getCurrenciesRates();
       return () => {
         if (!isUninitialized) {
           abort();
@@ -57,47 +51,49 @@ export const FormCurrencies: FC = () => {
         }
       };
     }
-  }, [inputValue, dispatch, getCurrenciesRates, isUninitialized, ratesInState]);
+  }, [dispatch, getCurrenciesRates, isUninitialized, ratesInState]);
 
-  const onChangeInput = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    const { value, id, dataset } = event.target;
-    const { code } = dataset;
+  const onChangeInput = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const { value, id, dataset } = event.target;
+      const { code } = dataset;
 
-    const requestObj: RequestObj = {
-      iso: id,
-      value,
-      code: code ?? Number(code),
-      isValid: value === '' ? true : isNumber(value),
-    };
-    console.log('requestObj', requestObj);
-    if (value === '' || value.match(/^([0-9]{1,})?(.)?([0-9]{1,})?$/)) {
-      requestObj.value = parseFloat(value) || '';
-      setInputValue(requestObj);
-    }
+      const requestObj: RequestObj = {
+        iso: id,
+        value,
+        code: code ?? Number(code),
+        isValid: value === '' ? true : isNumber(value),
+      };
 
-    console.log('requestObj', requestObj);
-  }, []);
+      if (value === '' || value.match(/^([0-9]{1,})?(.)?([0-9]{1,})?$/)) {
+        requestObj.value = parseFloat(value) || '';
+        setInputValue(requestObj);
+        if (requestObj.isValid) {
+          getCurrenciesRates(requestObj);
+        }
+      }
+    },
+    [getCurrenciesRates],
+  );
 
   const handleClickDeleteCurrency = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       const curIso = event.currentTarget.dataset.iso;
-      console.log('curIso', curIso);
+
       if (curIso) dispatch(ratesActions.deleteCustomISO(curIso));
     },
     [dispatch],
   );
 
-  console.log('error', error);
-
   return (
     <>
       {isLoading && <Spinner />}
-      {/* {error && 'message' in error && (
+      {error && 'message' in error && (
         <div className="pointer-events-none cursor-default py-12 text-base font-medium">
           {error.message}
         </div>
-      )} */}
-      {deSerializeRates && (
+      )}
+      {deSerializeRates && !isLoading && (
         <div className="relative h-full">
           <FormOfInputs
             deSerializeRates={deSerializeRates}

@@ -1,7 +1,6 @@
 import { FC } from 'react';
 
 export const SortButtonGroup: FC = () => (
-  // console.log('first');
   <div className="join flex w-full">
     <div className="btn join-item pointer-events-none h-4 cursor-default">Sort-By</div>
     <div className="divider divider-horizontal" />

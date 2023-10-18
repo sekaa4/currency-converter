@@ -16,8 +16,6 @@ export const InputCurrency: FC<InputCurrencyProp> = (props) => {
 
   const error = isValid ? 'input-info' : 'input-info';
 
-  console.log('errorINPUT', error);
-
   return (
     <div className="form-control w-full gap-1 py-4">
       <div className="relative flex flex-row gap-4">

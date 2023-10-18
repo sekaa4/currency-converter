@@ -26,13 +26,11 @@ export const DropMenuOfCurrencies: FC<DropMenuOfCurrenciesProps> = (props) => {
   useOutsideClick(elementRef, outSideCloseCallback);
 
   const handleClickAddCurrency = (event: React.MouseEvent<HTMLButtonElement>) => {
-    console.log('eventCLICK', event);
     const curIso = event.currentTarget.dataset.iso;
+    setIsShow(!isShow);
     if (curIso) dispatch(ratesActions.addCustomISO(curIso));
   };
 
-  console.log('deSerializeRates', deSerializeRates);
-  console.log('setIsShow', isShow);
   return (
     <div className="flex">
       <div className="top-14  w-full " ref={elementRef}>

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 
 import {
   ApiBadRequestResponse,
@@ -12,7 +12,9 @@ import {
 
 import { CurrenciesService } from './currencies.service';
 import { GetCurrencyQueryDto } from './dto/get-currency-query.dto';
+import { GetCurrencySortQueryDto } from './dto/get-currency-sort-query.dto';
 import { CurrencyFromCode } from './entities/currency-from-code.entity';
+import { ORDER_LIST, SORT_LIST } from './types/sort-type.type';
 
 @ApiTags('Currencies')
 @Controller('currencies')
@@ -20,6 +22,8 @@ export class CurrenciesController {
   constructor(private readonly currenciesService: CurrenciesService) {}
 
   @ApiOperation({ summary: 'Get all currencies', description: 'Get all currencies' })
+  @ApiQuery({ name: 'order', enum: ORDER_LIST, required: false })
+  @ApiQuery({ name: 'sort', enum: SORT_LIST, required: false })
   @ApiOkResponse({
     description: 'The resources were returned successfully',
     type: [CurrencyFromCode],
@@ -31,17 +35,17 @@ export class CurrenciesController {
     description: 'Something wrong in the server, try again later',
   })
   @Get()
-  findAll() {
-    return this.currenciesService.findAll();
+  findAll(@Query() query: GetCurrencySortQueryDto) {
+    return this.currenciesService.findAll(query);
   }
 
   @ApiOperation({
     summary: 'Get rates relative to a single currency code',
     description: 'Get rates relative to a single currency code',
   })
-  @ApiParam({ name: 'code', type: 'number', format: 'integer' })
-  @ApiQuery({ name: 'iso', type: 'string' })
-  @ApiQuery({ name: 'value', type: 'string', allowEmptyValue: true })
+  @ApiParam({ name: 'code', type: 'number', format: 'integer', required: false })
+  @ApiQuery({ name: 'iso', type: 'string', required: false })
+  @ApiQuery({ name: 'value', type: 'string', allowEmptyValue: true, required: false })
   @ApiOkResponse({
     description: 'The resource was returned successfully',
     type: [CurrencyFromCode],
@@ -52,9 +56,8 @@ export class CurrenciesController {
   @ApiInternalServerErrorResponse({
     description: 'Something wrong in the server, try again later',
   })
-  @Get(':code')
-  findOne(@Param('code', ParseIntPipe) code: number, @Query() query: GetCurrencyQueryDto) {
-    console.log('query', query);
-    return this.currenciesService.findOne(code, query);
+  @Get('/code')
+  findOne(@Query() query?: GetCurrencyQueryDto) {
+    return this.currenciesService.findOne(query);
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import { ConfigService } from '@nestjs/config';
@@ -5,10 +6,13 @@ import { ConfigService } from '@nestjs/config';
 import { CONSTANTS } from 'src/constants/constants';
 
 import { GetCurrencyQueryDto } from './dto/get-currency-query.dto';
+import { GetCurrencySortQueryDto } from './dto/get-currency-sort-query.dto';
 import { ResponseObjectRates } from './dto/response-object-rates.dto';
 import { CurrencyFromCode } from './entities/currency-from-code.entity';
 import { Currency } from './entities/currency.entity';
 import { ListCurrenciesRates } from './types/list-cyrrency-rates.interface';
+
+import { OrderType, SortType } from './types/sort-type.type';
 
 import * as localDB from '../database/in-memory/db-local.json';
 
@@ -23,20 +27,25 @@ export class CurrenciesService {
     this.urlMongoDB = this.configService.get<string>('MongoDB_API');
   }
 
-  async findAll() {
+  async findAll(queryParams?: GetCurrencySortQueryDto) {
     try {
-      const { codeUSD, dataUSD } = CONSTANTS;
-      return await this.findOne(codeUSD, dataUSD);
+      const resultObject = await this.findOne(undefined, queryParams);
+
+      return resultObject;
     } catch (error) {
-      console.log('error', error);
       if (error instanceof InternalServerErrorException || error instanceof BadRequestException)
         throw error;
       throw new InternalServerErrorException('Something wrong in the server, try again later');
     }
   }
 
-  async findOne(code: number, query: GetCurrencyQueryDto) {
-    const { value } = query;
+  async findOne(requestQuery?: GetCurrencyQueryDto, querySortParams?: GetCurrencySortQueryDto) {
+    const { codeUSD, dataUSD } = CONSTANTS;
+
+    const value =
+      requestQuery?.value || requestQuery?.value === 0 ? requestQuery?.value : dataUSD.value;
+    const code = requestQuery?.code ? requestQuery?.code : codeUSD;
+
     let timestamp: number | null = Date.now();
     let resultListCurrencies: Currency[] = [];
     let resultCurrencies: Currency[] | null = code === CONSTANTS.codeBLR ? CONSTANTS.dataBLR : null;
@@ -64,14 +73,20 @@ export class CurrenciesService {
         }
         resultListCurrencies = (await this.applyLocalDB()) as Currency[];
       }
-      const convertedResult = this.convertCurrencies(resultCurrencies, resultListCurrencies, value);
+      const convertedResult = this.convertCurrencies(
+        resultCurrencies,
+        resultListCurrencies,
+        value,
+        querySortParams,
+      );
+
       const serializedConvertedResult = JSON.stringify(Array.from(convertedResult));
 
       const responseObject: ResponseObjectRates = {
         rates: serializedConvertedResult,
         timestamp,
-        sort: null,
-        order: null,
+        sort: querySortParams?.sort ?? null,
+        order: querySortParams?.order ?? null,
       };
 
       return responseObject;
@@ -129,7 +144,7 @@ export class CurrenciesService {
 
   async applyLocalDB(code?: number) {
     if (code) {
-      const resultListCurrencies = localDB.rates as unknown as Currency[];
+      const resultListCurrencies = [...localDB.rates] as unknown as Currency[];
       const resultSearchCurrency = resultListCurrencies.find((currency) => currency.code === code);
 
       if (resultSearchCurrency) {
@@ -145,7 +160,12 @@ export class CurrenciesService {
     }
   }
 
-  convertCurrencies(currencies: Currency[], currenciesList: Currency[], value: number) {
+  convertCurrencies(
+    currencies: Currency[],
+    currenciesList: Currency[],
+    value: number,
+    querySortParams?: GetCurrencySortQueryDto,
+  ) {
     if (
       Array.isArray(currencies) &&
       Array.isArray(currenciesList) &&
@@ -153,6 +173,7 @@ export class CurrenciesService {
       currenciesList.length > 0
     ) {
       const currenciesMap = new Map<string, CurrencyFromCode>();
+
       const { rate, quantity } = currencies[0];
       const convertToBLR = (rate / quantity) * value;
       const { iso: blrIso, code: blrCode, date: blrDate, name: blrName } = CONSTANTS.dataBLR[0];
@@ -163,10 +184,18 @@ export class CurrenciesService {
         name: blrName,
         value: Number(convertToBLR.toFixed(4)),
       };
-      currenciesMap.set(blrIso, currencyBLR);
 
-      const convertedResult = currenciesList.reduce(
-        (acc: Map<string, CurrencyFromCode>, cur: Currency) => {
+      const indexUSD = currenciesList.findIndex(({ code }) => code === CONSTANTS.codeUSD);
+
+      const usdCurrency = [...currenciesList].splice(indexUSD, 1);
+      const updateCurrenciesList = [...usdCurrency, currencyBLR, ...currenciesList];
+
+      const currenciesFromCode = updateCurrenciesList.reduce(
+        (acc: CurrencyFromCode[], cur: Currency) => {
+          if (cur && cur.code === currencyBLR.code) {
+            acc.push(currencyBLR);
+            return acc;
+          }
           if (cur) {
             const {
               rate: currencyRate,
@@ -185,15 +214,35 @@ export class CurrenciesService {
               name: currencyName,
               value: parsedValueToNumber,
             };
-            acc.set(currencyIso, newCurrency);
+            acc.push(newCurrency);
+
             return acc;
           }
+
           return acc;
         },
-        currenciesMap,
+        [],
       );
 
-      return convertedResult;
+      let convertedResult: CurrencyFromCode[] = [...currenciesFromCode];
+
+      if (querySortParams) {
+        const { order, sort } = querySortParams;
+        convertedResult =
+          sort && order && order !== 'null'
+            ? this.sortCurrenciesByOrder(convertedResult, sort as Exclude<SortType, 'null'>, order)
+            : convertedResult;
+      }
+
+      return convertedResult.reduce((acc: Map<string, CurrencyFromCode>, cur: CurrencyFromCode) => {
+        if (cur) {
+          const { iso: currencyIso } = cur;
+
+          acc.set(currencyIso, cur);
+          return acc;
+        }
+        return acc;
+      }, currenciesMap);
     }
 
     throw new BadRequestException('Bad Request, currency is invalid');
@@ -205,5 +254,22 @@ export class CurrenciesService {
       return [resultSearchCurrency];
     }
     throw new BadRequestException('Bad Request, currency is invalid');
+  }
+
+  sortCurrenciesByOrder(
+    updateCurrenciesList: CurrencyFromCode[],
+    sort: Exclude<SortType, 'null'>,
+    order: Exclude<OrderType, 'null'>,
+  ): CurrencyFromCode[] {
+    return [...updateCurrenciesList].sort((a, b) => {
+      if (a[sort] === null) return 1;
+      if (b[sort] === null) return -1;
+      if (a[sort] === null && b[sort] === null) return 0;
+      return (
+        a[sort].toString().localeCompare(b[sort].toString(), 'en', {
+          numeric: true,
+        }) * (order === 'asc' ? 1 : -1)
+      );
+    });
   }
 }
