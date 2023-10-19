@@ -1,5 +1,7 @@
 # Currency converter application
 
+- Deploy link - [open deploy](https://currencies-converter-sekaa4.netlify.app/).
+
 ## Prerequisites
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
