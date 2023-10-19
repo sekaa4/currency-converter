@@ -1,0 +1,36 @@
+name: ESlint
+
+on:
+  push:
+    branches: ["develop"]
+  pull_request:
+    branches: ["develop"]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install and lint Client
+        working-directory: ./client
+        run: |
+          npm ci
+          npm run lint:es
+
+      - name: Install and lint Server
+        working-directory: ./server
+        run: |
+          npm ci
+          npm run lint:es
