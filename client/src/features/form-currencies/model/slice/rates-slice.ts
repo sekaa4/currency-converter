@@ -21,10 +21,10 @@ export const ratesSlice = createSlice({
   reducers: {
     changeState: (state, action: PayloadAction<RatesStateFromServer>) => {
       if (action.payload) {
-        state = { ...state, ...action.payload };
+        const { rates, timestamp } = action.payload;
+        state.rates = rates;
+        state.timestamp = timestamp;
       }
-
-      return state;
     },
     addCustomISO: (state, action: PayloadAction<string>) => {
       if (action.payload) {

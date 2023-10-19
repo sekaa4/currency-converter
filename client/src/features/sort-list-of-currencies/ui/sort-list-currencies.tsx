@@ -1,5 +1,5 @@
 /* eslint-disable consistent-return */
-import { FC, useEffect, useRef } from 'react';
+import { FC, useEffect, useMemo, useRef } from 'react';
 
 import { sortRatesActions } from '..';
 import { useLazyFetchSortCurrenciesRatesFromAPI } from '../api/get-sort-currencies-from-API';
@@ -24,8 +24,8 @@ export const SortListCurrencies: FC = () => {
   const dispatch = useAppDispatch();
   const sortRatesInState = useAppSelector(getRatesFromSortRatesState);
   const sortByFromSortRatesState = useAppSelector(getSortByFromSortRatesState);
-  const isMounted = useRef(false);
   const timestampInState = useAppSelector(getTimestampFromSortRatesState);
+  const isMounted = useRef(false);
 
   useEffect(() => {
     if (data) {
@@ -35,11 +35,10 @@ export const SortListCurrencies: FC = () => {
 
   useEffect(() => {
     if (!sortRatesInState) {
-      const { abort, unsubscribe } = getListCurrenciesRates();
+      const { abort } = getListCurrenciesRates();
       return () => {
         if (!isUninitialized) {
           abort();
-          unsubscribe();
         }
       };
     }
@@ -48,19 +47,26 @@ export const SortListCurrencies: FC = () => {
   useEffect(() => {
     if (isMounted.current) {
       const { order, sortBy } = sortByFromSortRatesState;
+
       if (sortBy && (order || order === null)) {
         const { abort } = getListCurrenciesRates({ order, sort: sortBy });
         return () => {
-          abort();
+          if (!isUninitialized) {
+            abort();
+          }
         };
       }
     } else {
       isMounted.current = true;
     }
-  }, [getListCurrenciesRates, sortByFromSortRatesState]);
+  }, [getListCurrenciesRates, isUninitialized, sortByFromSortRatesState]);
 
-  const deSerializeSortRates =
-    sortRatesInState && (new Map(JSON.parse(sortRatesInState)) as RatesType);
+  const deSerializeSortRates = useMemo(() => {
+    if (sortRatesInState) {
+      return new Map(JSON.parse(sortRatesInState)) as RatesType;
+    }
+    return '';
+  }, [sortRatesInState]);
 
   return (
     <>
@@ -69,13 +75,13 @@ export const SortListCurrencies: FC = () => {
           <Spinner />
         </Portal>
       )}
-      <div className={`relative ${isLoading ? 'pointer-events-none -z-10 select-none' : ''}`}>
-        {!isLoading && error && 'message' in error && error.message !== 'Aborted' && (
+      <div className={`relative ${isLoading ? 'pointer-events-none select-none' : ''}`}>
+        {error && 'message' in error && error.message !== 'Aborted' && (
           <MessageError text={error.message} />
         )}
-        {!isLoading && error && 'data' in error && <MessageError list />}
+        {error && 'data' in error && <MessageError list />}
 
-        {!isLoading && !error && deSerializeSortRates && (
+        {deSerializeSortRates && (
           <div className="relative h-full pb-14 pt-[5rem]">
             <div className="wrap m-auto max-w-xs font-semibold">
               По курсу НБ РБ,{' '}

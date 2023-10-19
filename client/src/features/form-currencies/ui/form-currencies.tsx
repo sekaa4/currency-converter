@@ -29,9 +29,14 @@ export const FormCurrencies: FC = () => {
   const customIsoInState = useAppSelector(getCustomIsoFromState);
   const timestampInState = useAppSelector(getTimestampFromState);
   const [inputValue, setInputValue] = useState<RequestObj | undefined>();
-
-  const deSerializeRates = ratesInState && (new Map(JSON.parse(ratesInState)) as RatesType);
   const isMounted = useRef(false);
+
+  const deSerializeRates = useMemo(() => {
+    if (ratesInState) {
+      return new Map(JSON.parse(ratesInState)) as RatesType;
+    }
+    return '';
+  }, [ratesInState]);
 
   const isoOutOfDropMenu = useMemo(
     () => [...basicIsoInState, ...customIsoInState],
@@ -46,11 +51,10 @@ export const FormCurrencies: FC = () => {
 
   useEffect(() => {
     if (!ratesInState) {
-      const { abort, unsubscribe } = getCurrenciesRates();
+      const { abort } = getCurrenciesRates();
       return () => {
         if (!isUninitialized) {
           abort();
-          unsubscribe();
         }
       };
     }
@@ -81,12 +85,14 @@ export const FormCurrencies: FC = () => {
     };
 
     if (value === '' || value.match(/^([0-9]{1,})?(.)?([0-9]{1,})?$/)) {
+      console.log(value === '', 'hjkhl');
       if (value.includes('.') && value.indexOf('.') === value.lastIndexOf('.')) {
         requestObj.value = value.at(-1) === '.' ? value : `${parseFloat(value)}`;
         requestObj.isValid = true;
         setInputValue(requestObj);
       } else {
-        requestObj.value = isNumber(value) ? `${value}` : '';
+        requestObj.value = isNumber(value) ? `${value}` : `${parseFloat(value) || ''}`;
+        requestObj.isValid = true;
         setInputValue(requestObj);
       }
     }
@@ -103,17 +109,17 @@ export const FormCurrencies: FC = () => {
 
   return (
     <>
-      {true && (
+      {isLoading && (
         <Portal>
           <Spinner isLoading={isLoading} />
         </Portal>
       )}
-      <div className={`relative py-8 ${isLoading ? 'pointer-events-none -z-10 select-none' : ''}`}>
-        {!isLoading && error && 'message' in error && error.message !== 'Aborted' && (
+      <div className={`relative py-8 ${isLoading ? 'pointer-events-none select-none' : ''}`}>
+        {error && 'message' in error && error.message !== 'Aborted' && (
           <MessageError text={error.message} />
         )}
-        {!isLoading && error && 'data' in error && <MessageError />}
-        {!isLoading && deSerializeRates && (
+        {error && 'data' in error && <MessageError />}
+        {deSerializeRates && (
           <div className="relative h-full">
             <FormOfInputs
               deSerializeRates={deSerializeRates}
