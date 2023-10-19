@@ -70,6 +70,11 @@ export const SortListCurrencies: FC = () => {
           {error.message}
         </div>
       )}
+      {!isLoading && error && 'data' in error && error.data && (
+        <div className="pointer-events-none cursor-default py-12 text-base font-medium">
+          Something wrong on the server side, try later
+        </div>
+      )}
       {!isLoading && deSerializeSortRates && (
         <div className="relative h-full pb-14 pt-[4.5rem]">
           <ListOfCurrencies deSerializeSortRates={deSerializeSortRates} />

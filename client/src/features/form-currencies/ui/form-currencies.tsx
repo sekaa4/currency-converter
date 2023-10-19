@@ -105,6 +105,11 @@ export const FormCurrencies: FC = () => {
           {error.message}
         </div>
       )}
+      {!isLoading && error && 'data' in error && error.data && (
+        <div className="pointer-events-none cursor-default py-12 text-base font-medium">
+          Something wrong on the server side, try later
+        </div>
+      )}
       {!isLoading && deSerializeRates && (
         <div className="relative h-full">
           <FormOfInputs
