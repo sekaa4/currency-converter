@@ -5,7 +5,8 @@ export class GetCurrencyQueryDto {
   @IsNumber()
   @IsOptional()
   @Transform(({ value }) => {
-    return Number(value);
+    if (value.trim() === '') return Number(value);
+    return parseFloat(value);
   })
   value?: number;
 
