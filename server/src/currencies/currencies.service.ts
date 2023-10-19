@@ -27,7 +27,7 @@ export class CurrenciesService {
     private databaseService: DatabaseService,
     private bankApiService: BankApiService,
   ) {
-    this.urlMongoDB = this.configService.get<string>('MongoDB_API');
+    this.urlMongoDB = this.configService.get<string>('MONGO_DB_API');
   }
 
   async findAll(queryParams?: GetCurrencySortQueryDto) {
@@ -57,7 +57,7 @@ export class CurrenciesService {
         const ratesInDB = await this.databaseService.getRatesFromDB();
         if (ratesInDB && 'rates' in ratesInDB) {
           const curTimestamp = Date.now();
-          const timestampDB = ratesInDB.updatedAt.getTime();
+          const timestampDB = this.databaseService.timestamp;
           const isExpired = curTimestamp - timestampDB > CONSTANTS.expiredTime;
 
           if (isExpired) {

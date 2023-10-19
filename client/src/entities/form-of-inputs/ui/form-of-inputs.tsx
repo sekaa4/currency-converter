@@ -29,10 +29,10 @@ export const FormOfInputs: FC<FormOfInputsProps> = (props) => {
   return (
     <form>
       <fieldset className="flex flex-col items-center">
-        <legend>
+        <legend className="wrap flex max-w-xs">
           По курсу НБ РБ,{' '}
           {timestampInState
-            ? `данные из базы на ${new Date(timestampInState)}`
+            ? `данные из базы на ${new Date(timestampInState).toLocaleString()}`
             : 'данные из локальной базы'}
         </legend>
         {basicIsoInState.map((basicIso) => {
