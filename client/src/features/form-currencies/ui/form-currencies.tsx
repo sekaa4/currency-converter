@@ -111,7 +111,7 @@ export const FormCurrencies: FC = () => {
     <>
       {isLoading && (
         <Portal>
-          <Spinner isLoading={isLoading} />
+          <Spinner />
         </Portal>
       )}
       <div className={`relative py-8 ${isLoading ? 'pointer-events-none select-none' : ''}`}>
