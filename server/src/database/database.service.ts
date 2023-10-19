@@ -5,7 +5,6 @@ import { Model } from 'mongoose';
 import { BankApiService } from 'src/bank-api/bank-api.service';
 import { Currency } from 'src/currencies/entities/currency.entity';
 import { ListCurrenciesRates } from 'src/currencies/types/list-cyrrency-rates.interface';
-import { CurrenciesDocument, CurrencyDb } from 'src/schemas/currencies.schema';
 import { Rates, RatesDocument } from 'src/schemas/rates.schema';
 
 import * as dbLocal from './in-memory/db-local.json';
@@ -18,7 +17,6 @@ export class DatabaseService {
 
   constructor(
     @InjectModel(Rates.name) private ratesModel: Model<RatesDocument>,
-    @InjectModel(CurrencyDb.name) private currencyModel: Model<CurrenciesDocument>,
     private bankApiService: BankApiService,
   ) {
     this.createNewRate();
@@ -26,7 +24,11 @@ export class DatabaseService {
 
   async updateDataDb(data: ListCurrenciesRates) {
     try {
-      const updateRate = await this.ratesModel.findByIdAndUpdate(this.id, data);
+      const updateRate = await this.ratesModel.findByIdAndUpdate(
+        this.id,
+        { $set: data },
+        { new: true },
+      );
 
       if (updateRate) this.timestamp = updateRate.updatedAt.getTime();
     } catch (error) {
@@ -45,12 +47,12 @@ export class DatabaseService {
 
         const result = await newRate.save();
         this.id = result.id;
-        this.timestamp = result.updatedAt.getTime();
+        this.timestamp = result.createdAt.getTime();
       } else {
         const newRate = new this.ratesModel(dbLocal);
         const result = await newRate.save();
         this.id = result.id;
-        this.timestamp = result.updatedAt.getTime();
+        this.timestamp = result.createdAt.getTime();
       }
     } catch (error) {
       console.log(error);
