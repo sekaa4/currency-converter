@@ -63,7 +63,7 @@ export const FormOfInputs: FC<FormOfInputsProps> = (props) => {
                 <InputCurrency
                   key={code}
                   name={name}
-                  value={!inputValue ? value : inputValue.value}
+                  value={inputValue && inputValue.iso === iso ? inputValue.value : value}
                   iso={iso}
                   code={code}
                   onChange={onChangeInput}

@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 /* eslint-disable no-param-reassign */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
@@ -24,44 +25,32 @@ export const sortRatesSlice = createSlice({
     changeSortState: (state, action: PayloadAction<RatesStateFromServer>) => {
       const { rates, sort, order, timestamp } = action.payload;
 
-      if (sort && (order || order === null)) {
-        const orderPosition = state.sortState.orders.findIndex((curOrder) => curOrder === order);
-
-        state = {
-          sortRates: rates,
-          sortState: { orders: state.sortState.orders, orderPosition, sortBy: sort, order },
-          timestamp,
-        };
-
-        return state;
+      if (rates && sort && (order || order === null)) {
+        state.sortRates = rates;
+        state.timestamp = timestamp;
+        return;
       }
 
-      state = {
-        sortRates: rates,
-        sortState: state.sortState,
-        timestamp,
-      };
-
-      return state;
+      state.sortRates = rates;
     },
 
     changeSortOrderState: (state, action: PayloadAction<SortByType>) => {
-      const prevSortBy = state.sortState.sortBy;
-      const { orders, order } = state.sortState;
+      const { orders, order, sortBy: prevSortBy } = state.sortState;
 
       if (action.payload === prevSortBy) {
         const curOrderPosition = orders.findIndex((curOrder) => curOrder === order);
         const curOrder = orders[(curOrderPosition + 1) % orders.length];
 
-        state.sortState = {
-          sortBy: prevSortBy,
-          order: curOrder,
-          orderPosition: curOrderPosition,
-          orders,
-        };
-      } else {
-        state.sortState = { sortBy: action.payload, order: orders[0], orderPosition: 0, orders };
+        state.sortState.sortBy = prevSortBy;
+        state.sortState.order = curOrder;
+        state.sortState.orderPosition = curOrderPosition;
+        state.sortState.orders = orders;
+
+        return;
       }
+      state.sortState.sortBy = action.payload;
+      state.sortState.order = 'asc';
+      state.sortState.orderPosition = 0;
     },
 
     setupInitialState: (state) => {
