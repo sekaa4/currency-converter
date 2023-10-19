@@ -12,7 +12,7 @@ const getSortCurrenciesFromAPI = rtkAPI.injectEndpoints({
           const { sort, order } = searchParams;
 
           return {
-            url: '/',
+            url: '/currencies',
             params: {
               sort,
               order,
@@ -21,7 +21,7 @@ const getSortCurrenciesFromAPI = rtkAPI.injectEndpoints({
         }
 
         return {
-          url: '/',
+          url: '/currencies',
         };
       },
       transformResponse: (response: unknown) => {

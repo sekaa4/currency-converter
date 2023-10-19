@@ -26,7 +26,7 @@ export const TableHead: FC<TableHeadProps> = ({ columns }) => {
 
   return (
     <thead>
-      <tr>
+      <tr className="font-bold">
         {columns.map((headInfo) => {
           const { accessor, label } = headInfo;
           const hasHandle = !!(accessor === 'name' || accessor === 'value');

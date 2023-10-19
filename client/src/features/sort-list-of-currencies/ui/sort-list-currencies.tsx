@@ -71,7 +71,7 @@ export const SortListCurrencies: FC = () => {
         </div>
       )}
       {!isLoading && deSerializeSortRates && (
-        <div className="relative h-full pb-7 pt-[4.5rem]">
+        <div className="relative h-full pb-14 pt-[4.5rem]">
           <ListOfCurrencies deSerializeSortRates={deSerializeSortRates} />
         </div>
       )}
