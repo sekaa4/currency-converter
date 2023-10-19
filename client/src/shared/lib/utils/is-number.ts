@@ -1,5 +1,5 @@
 export const isNumber = (str: string) => {
-  if (str.trim() === '') {
+  if (str.trim() === '' || str.includes('.')) {
     return false;
   }
 

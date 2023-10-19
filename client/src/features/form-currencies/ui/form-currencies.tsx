@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import { ChangeEvent, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useLazyFetchCurrenciesRatesFromAPI } from '../api/get-currencies-rates-from-API';
@@ -15,6 +16,8 @@ import { useAppDispatch, useAppSelector } from '@/shared/hooks';
 import { RequestObj } from '@/shared/lib/types/request-obj.interface';
 import { RatesType } from '@/shared/lib/types/response-rates.type';
 import { isNumber } from '@/shared/lib/utils/is-number';
+import { MessageError } from '@/shared/ui/message-error/message-error';
+import { Portal } from '@/shared/ui/portal/portal';
 import { Spinner } from '@/shared/ui/spinner/spinner';
 
 export const FormCurrencies: FC = () => {
@@ -41,7 +44,6 @@ export const FormCurrencies: FC = () => {
     }
   }, [data, dispatch]);
 
-  // eslint-disable-next-line consistent-return
   useEffect(() => {
     if (!ratesInState) {
       const { abort, unsubscribe } = getCurrenciesRates();
@@ -54,22 +56,18 @@ export const FormCurrencies: FC = () => {
     }
   }, [dispatch, getCurrenciesRates, isUninitialized, ratesInState]);
 
-  // eslint-disable-next-line consistent-return
   useEffect(() => {
     if (isMounted.current) {
-      if (inputValue) {
-        const { abort, unsubscribe } = getCurrenciesRates(inputValue);
+      if (inputValue && inputValue.isValid) {
+        const { abort } = getCurrenciesRates(inputValue);
         return () => {
-          if (!isUninitialized) {
-            abort();
-            unsubscribe();
-          }
+          abort();
         };
       }
     } else {
       isMounted.current = true;
     }
-  }, [getCurrenciesRates, inputValue, isUninitialized]);
+  }, [getCurrenciesRates, inputValue]);
 
   const onChangeInput = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const { value, id, dataset } = event.target;
@@ -83,8 +81,14 @@ export const FormCurrencies: FC = () => {
     };
 
     if (value === '' || value.match(/^([0-9]{1,})?(.)?([0-9]{1,})?$/)) {
-      requestObj.value = parseFloat(value) || '';
-      setInputValue(requestObj);
+      if (value.includes('.') && value.indexOf('.') === value.lastIndexOf('.')) {
+        requestObj.value = value.at(-1) === '.' ? value : `${parseFloat(value)}`;
+        requestObj.isValid = true;
+        setInputValue(requestObj);
+      } else {
+        requestObj.value = isNumber(value) ? `${value}` : '';
+        setInputValue(requestObj);
+      }
     }
   }, []);
 
@@ -99,35 +103,35 @@ export const FormCurrencies: FC = () => {
 
   return (
     <>
-      {isLoading && <Spinner />}
-      {!isLoading && error && 'message' in error && error.message !== 'Aborted' && (
-        <div className="pointer-events-none cursor-default py-12 text-base font-medium">
-          {error.message}
-        </div>
+      {true && (
+        <Portal>
+          <Spinner isLoading={isLoading} />
+        </Portal>
       )}
-      {!isLoading && error && 'data' in error && error.data && (
-        <div className="pointer-events-none cursor-default py-12 text-base font-medium">
-          Something wrong on the server side, try later
-        </div>
-      )}
-      {!isLoading && deSerializeRates && (
-        <div className="relative h-full">
-          <FormOfInputs
-            deSerializeRates={deSerializeRates}
-            timestampInState={timestampInState}
-            basicIsoInState={basicIsoInState}
-            customIsoInState={customIsoInState}
-            inputValue={inputValue}
-            onChangeInput={onChangeInput}
-            handleClickDeleteCurrency={handleClickDeleteCurrency}
-          />
+      <div className={`relative py-8 ${isLoading ? 'pointer-events-none -z-10 select-none' : ''}`}>
+        {!isLoading && error && 'message' in error && error.message !== 'Aborted' && (
+          <MessageError text={error.message} />
+        )}
+        {!isLoading && error && 'data' in error && <MessageError />}
+        {!isLoading && deSerializeRates && (
+          <div className="relative h-full">
+            <FormOfInputs
+              deSerializeRates={deSerializeRates}
+              timestampInState={timestampInState}
+              basicIsoInState={basicIsoInState}
+              customIsoInState={customIsoInState}
+              inputValue={inputValue}
+              onChangeInput={onChangeInput}
+              handleClickDeleteCurrency={handleClickDeleteCurrency}
+            />
 
-          <DropMenuOfCurrencies
-            deSerializeRates={deSerializeRates}
-            isoOutOfDropMenu={isoOutOfDropMenu}
-          />
-        </div>
-      )}
+            <DropMenuOfCurrencies
+              deSerializeRates={deSerializeRates}
+              isoOutOfDropMenu={isoOutOfDropMenu}
+            />
+          </div>
+        )}
+      </div>
     </>
   );
 };

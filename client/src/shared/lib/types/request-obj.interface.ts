@@ -1,6 +1,6 @@
 export interface RequestObj {
   iso: string;
-  value: number | string;
+  value: string;
   code?: number | string;
   isValid: boolean;
 }
