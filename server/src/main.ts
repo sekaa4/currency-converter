@@ -11,7 +11,6 @@ async function bootstrap() {
 
   const configDotEnv = app.get(ConfigService);
   const port = configDotEnv.get<number>('PORT');
-  console.log('port', port);
 
   const config = new DocumentBuilder()
     .setTitle('Currency Service')

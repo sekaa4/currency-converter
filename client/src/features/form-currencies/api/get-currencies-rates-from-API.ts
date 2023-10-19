@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/indent */
 import { RatesStateFromServer } from '../model/types/rates-state.interface';
 
 import { rtkAPI } from '@/shared/api/rtk-Api';
