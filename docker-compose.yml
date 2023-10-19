@@ -20,14 +20,18 @@ services:
       - default
 
   server:
-    build: ./server
+    build:
+      dockerfile: Dockerfile
+      context: ./server
+      target: development
     container_name: serverapp_c
     ports:
       - "3000:3000"
     volumes:
-      - ./server:/usr/app
-      - /usr/app/node_modules
+      - ./server:/app
+      - /app/node_modules
     networks:
       - default
     env_file:
       - ./server/.env
+    command: npm run start:dev
