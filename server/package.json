@@ -17,7 +17,6 @@
     "lint:es": "eslint \"**/*.{js,ts}\"",
     "lint:es:fix": "npm run lint:es -- --fix",
     "lint:all": "npm run editorconfig && npm run type:check && npm run lint:es:fix",
-    "prepare": "cd .. && husky install server/.husky",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
