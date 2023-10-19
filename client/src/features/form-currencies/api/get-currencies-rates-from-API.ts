@@ -11,7 +11,7 @@ const getCurrenciesRatesFromAPI = rtkAPI.injectEndpoints({
       query: ({ iso, value, code } = {} as RequestObj) => {
         if (code && (value || value === '') && iso) {
           return {
-            url: '/code',
+            url: '/currencies/code',
             params: {
               code,
               iso,
@@ -20,7 +20,7 @@ const getCurrenciesRatesFromAPI = rtkAPI.injectEndpoints({
           };
         }
         return {
-          url: '/code',
+          url: '/currencies/code',
         };
       },
       transformResponse: (response: unknown) => {
