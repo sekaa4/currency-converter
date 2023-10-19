@@ -11,13 +11,14 @@ async function bootstrap() {
 
   const configDotEnv = app.get(ConfigService);
   const port = configDotEnv.get<number>('PORT');
+  console.log('port', port);
 
   const config = new DocumentBuilder()
     .setTitle('Currency Service')
     .setDescription('Currency Converter API with CRUD functionality')
     .setVersion('1.0')
     .addServer(`http://localhost:${port}`)
-    .addServer(`https://hls-lw2o.onrender.com`)
+    .addServer(`https://currencyconverter-3lrn6ek7.b4a.run/`)
     .build();
   const document = SwaggerModule.createDocument(app, config);
 
