@@ -1,29 +1,32 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import { ConfigService } from '@nestjs/config';
 
+import { BankApiService } from 'src/bank-api/bank-api.service';
 import { CONSTANTS } from 'src/constants/constants';
+
+import { DatabaseService } from 'src/database/database.service';
 
 import { GetCurrencyQueryDto } from './dto/get-currency-query.dto';
 import { GetCurrencySortQueryDto } from './dto/get-currency-sort-query.dto';
 import { ResponseObjectRates } from './dto/response-object-rates.dto';
 import { CurrencyFromCode } from './entities/currency-from-code.entity';
 import { Currency } from './entities/currency.entity';
-import { ListCurrenciesRates } from './types/list-cyrrency-rates.interface';
 
+import { ListCurrenciesRates } from './types/list-cyrrency-rates.interface';
 import { OrderType, SortType } from './types/sort-type.type';
 
-import * as localDB from '../database/in-memory/db-local.json';
+import * as dbLocal from '../database/in-memory/db-local.json';
 
 @Injectable()
 export class CurrenciesService {
-  private readonly url: string;
-
   private readonly urlMongoDB?: string;
 
-  constructor(private configService: ConfigService) {
-    this.url = this.configService.getOrThrow<string>('BANK_API');
+  constructor(
+    private configService: ConfigService,
+    private databaseService: DatabaseService,
+    private bankApiService: BankApiService,
+  ) {
     this.urlMongoDB = this.configService.get<string>('MongoDB_API');
   }
 
@@ -46,50 +49,73 @@ export class CurrenciesService {
       requestQuery?.value || requestQuery?.value === 0 ? requestQuery?.value : dataUSD.value;
     const code = requestQuery?.code ? requestQuery?.code : codeUSD;
 
-    let timestamp: number | null = Date.now();
+    let timestamp: number | null = null;
     let resultListCurrencies: Currency[] = [];
     let resultCurrencies: Currency[] | null = code === CONSTANTS.codeBLR ? CONSTANTS.dataBLR : null;
     try {
       if (this.urlMongoDB) {
-        if (timestamp) {
-          resultListCurrencies = localDB.rates as unknown as Currency[];
-          resultCurrencies =
-            resultCurrencies ?? this.searchDataCurrencyFromCode(resultListCurrencies, code);
-        } else {
-          if (!resultCurrencies) {
-            [resultCurrencies, resultListCurrencies] = (await this.fetchAllCurrenciesData(
-              code,
-            )) as Currency[][];
+        const ratesInDB = await this.databaseService.getRatesFromDB();
+        if (ratesInDB && 'rates' in ratesInDB) {
+          const curTimestamp = Date.now();
+          const timestampDB = ratesInDB.updatedAt.getTime();
+          const isExpired = curTimestamp - timestampDB > CONSTANTS.expiredTime;
+
+          if (isExpired) {
+            const ratesFromBankApi =
+              (await this.bankApiService.fetchCurrenciesDataBankApi()) as ListCurrenciesRates | null;
+            if (ratesFromBankApi && ratesFromBankApi.rates) {
+              resultListCurrencies = [...ratesFromBankApi.rates];
+              await this.databaseService.updateDataDb(ratesFromBankApi);
+              timestamp = curTimestamp;
+            } else {
+              resultListCurrencies = [...ratesInDB.rates];
+              timestamp = timestampDB;
+            }
+          } else {
+            resultListCurrencies = [...ratesInDB.rates];
+            timestamp = timestampDB;
           }
-          resultListCurrencies = (await this.fetchAllCurrenciesData()) as Currency[];
+        } else if (ratesInDB) {
+          timestamp = null;
+          resultListCurrencies = [...ratesInDB];
+        }
+
+        if (code) {
+          const currency = resultListCurrencies.find(({ code: curCode }) => curCode === code);
+          if (currency) {
+            resultCurrencies = [currency];
+          }
         }
       } else {
         timestamp = null;
 
         if (!resultCurrencies) {
-          [resultCurrencies, resultListCurrencies] = (await this.applyLocalDB(
-            code,
-          )) as Currency[][];
+          [resultCurrencies, resultListCurrencies] = this.applyLocalDB(code) as Currency[][];
         }
+
         resultListCurrencies = (await this.applyLocalDB()) as Currency[];
       }
-      const convertedResult = this.convertCurrencies(
-        resultCurrencies,
-        resultListCurrencies,
-        value,
-        querySortParams,
-      );
 
-      const serializedConvertedResult = JSON.stringify(Array.from(convertedResult));
+      if (resultCurrencies) {
+        const convertedResult = this.convertCurrencies(
+          resultCurrencies,
+          resultListCurrencies,
+          value,
+          querySortParams,
+        );
 
-      const responseObject: ResponseObjectRates = {
-        rates: serializedConvertedResult,
-        timestamp,
-        sort: querySortParams?.sort ?? null,
-        order: querySortParams?.order ?? null,
-      };
+        const serializedConvertedResult = JSON.stringify(Array.from(convertedResult));
 
-      return responseObject;
+        const responseObject: ResponseObjectRates = {
+          rates: serializedConvertedResult,
+          timestamp,
+          sort: querySortParams?.sort ?? null,
+          order: querySortParams?.order ?? null,
+        };
+
+        return responseObject;
+      }
+      throw new InternalServerErrorException('Something wrong in the server, try again later');
     } catch (error) {
       if (error instanceof InternalServerErrorException || error instanceof BadRequestException)
         throw error;
@@ -97,54 +123,9 @@ export class CurrenciesService {
     }
   }
 
-  async fetchAllCurrenciesData(code?: number) {
-    try {
-      if (code) {
-        const [responseCurrency, responseListCurrencies] = (await Promise.all([
-          fetch(`${this.url}?currencyCode=${code}`).then((response) => response.json()),
-          fetch(`${this.url}`).then((response) => response.json()),
-        ])) as ListCurrenciesRates[];
-        const resultCurrenciesBank = responseCurrency.rates;
-        const resultListCurrenciesBank = responseListCurrencies.rates;
-        if (
-          Array.isArray(resultCurrenciesBank) &&
-          Array.isArray(resultListCurrenciesBank) &&
-          resultCurrenciesBank.length === 0 &&
-          resultListCurrenciesBank.length === 0
-        ) {
-          return await this.applyLocalDB(code);
-        }
-        if (
-          Array.isArray(resultCurrenciesBank) &&
-          Array.isArray(resultListCurrenciesBank) &&
-          resultCurrenciesBank.length !== 0 &&
-          resultListCurrenciesBank.length !== 0
-        ) {
-          return [resultCurrenciesBank, resultListCurrenciesBank];
-        }
-        throw new InternalServerErrorException('Something wrong in the server, try again later');
-      } else {
-        const responseListCurrencies = (await fetch(`${this.url}`).then((response) =>
-          response.json(),
-        )) as ListCurrenciesRates;
-
-        const resultListCurrenciesBank = responseListCurrencies.rates;
-        if (Array.isArray(resultListCurrenciesBank) && resultListCurrenciesBank.length === 0) {
-          return await this.applyLocalDB();
-        }
-        if (Array.isArray(resultListCurrenciesBank) && resultListCurrenciesBank.length !== 0) {
-          return resultListCurrenciesBank;
-        }
-        throw new InternalServerErrorException('Something wrong in the server, try again later');
-      }
-    } catch (error) {
-      throw new InternalServerErrorException('Something wrong in the server, try again later');
-    }
-  }
-
-  async applyLocalDB(code?: number) {
+  applyLocalDB(code?: number) {
     if (code) {
-      const resultListCurrencies = [...localDB.rates] as unknown as Currency[];
+      const resultListCurrencies = [...dbLocal.rates] as unknown as Currency[];
       const resultSearchCurrency = resultListCurrencies.find((currency) => currency.code === code);
 
       if (resultSearchCurrency) {
@@ -154,7 +135,7 @@ export class CurrenciesService {
 
       throw new BadRequestException('Bad Request, currency is invalid');
     } else {
-      const resultListCurrencies = localDB.rates as unknown as Currency[];
+      const resultListCurrencies = dbLocal.rates as unknown as Currency[];
 
       return resultListCurrencies;
     }

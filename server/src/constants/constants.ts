@@ -15,4 +15,5 @@ export const CONSTANTS = {
       name: 'белорусский рубль',
     },
   ],
+  expiredTime: 7_200_000,
 };
