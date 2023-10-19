@@ -85,7 +85,6 @@ export const FormCurrencies: FC = () => {
     };
 
     if (value === '' || value.match(/^([0-9]{1,})?(.)?([0-9]{1,})?$/)) {
-      console.log(value === '', 'hjkhl');
       if (value.includes('.') && value.indexOf('.') === value.lastIndexOf('.')) {
         requestObj.value = value.at(-1) === '.' ? value : `${parseFloat(value)}`;
         requestObj.isValid = true;
@@ -111,7 +110,7 @@ export const FormCurrencies: FC = () => {
     <>
       {isLoading && (
         <Portal>
-          <Spinner isLoading={isLoading} />
+          <Spinner />
         </Portal>
       )}
       <div className={`relative py-8 ${isLoading ? 'pointer-events-none select-none' : ''}`}>

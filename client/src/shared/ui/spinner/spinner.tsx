@@ -5,7 +5,7 @@ interface SpinnerProps {
 }
 
 export const Spinner: FC<SpinnerProps> = () => (
-  <div className="pointer-events-none z-20 m-auto h-screen w-screen bg-slate-400 opacity-30">
+  <div className="pointer-events-none fixed left-0 top-0 z-20 m-auto h-screen w-screen opacity-30">
     <div aria-label="Loading..." role="status" className="mx-auto flex justify-center py-20">
       <svg className="black h-10 w-10 animate-spin" viewBox="3 3 18 18">
         <path
